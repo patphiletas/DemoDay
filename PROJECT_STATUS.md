@@ -17,12 +17,12 @@
 - [x] Structure de dossiers mise en place
 
 **À faire avant le jour 3**:
-- [ ] BDD PostgreSQL (Neon) créée
-- [ ] `.env.local` complété avec DATABASE_URL
-- [ ] Migrations générées et appliquées
+- [x] BDD PostgreSQL (Neon) créée
+- [x] `.env.local` complété avec DATABASE_URL
+- [x] Migrations générées et appliquées
 
 ### Jour 3-5: Authentification Better Auth
-- [ ] Better Auth configuré
+- [x] Better Auth configuré
 - [ ] Pages signup/signin créées
 - [ ] Server Actions pour auth
 - [ ] Navbar avec état auth

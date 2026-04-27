@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 Projet Alternative
 
-## Getting Started
+## Maison d'Édition Fictive
 
-First, run the development server:
+> Une plateforme complète de **soumission, publication et modération de manuscrits** avec authentification, commentaires, notation et notifications par email.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+https://demo-day-wine.vercel.app/
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🎓 Objectifs pédagogiques
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| # | Concept | Stack |
+|---|---------|-------|
+| 1️⃣ | Routes dynamiques | `/publications/[slug]` |
+| 2️⃣ | BDD + migrations | Drizzle ORM + PostgreSQL |
+| 3️⃣ | Auth + protections | Better Auth + sessions HTTP-only |
+| 4️⃣ | Validation serveur | Zod schemas |
+| 5️⃣ | Tests unitaires | Vitest (min 5 tests) |
+| 6️⃣ | CI/CD | GitHub Actions + Vercel |
+| 7️⃣ | Gestion erreurs | Custom error classes, UX-friendly |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🏗️ Fonctionnalités principales
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Authentification (Jour 3-5)
+- **Signup**: Créer un compte avec email, username, password
+- **Signin**: Se connecter et rester authentifié via cookies HTTP-only
+- **Signout**: Déconnexion sécurisée
+- **Session persistance**: Rester connecté après refresh
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Soumission de manuscrits (Jour 6-8)
+- **Users connectés** peuvent soumettre un manuscrit
+- Formulaire: Titre, contenu (markdown), catégorie
+- Stockage en BDD avec status: `submitted`
+- Page "Mes soumissions": voir l'état de chaque manuscrit
 
-## Deploy on Vercel
+### 3. Système d'acceptation/rejet (Jour 9-10)
+- **Admin dashboard**: lister tous les manuscrits en attente
+- Voir le détail complet d'un manuscrit
+- Boutons: **Accepter** → crée une publication | **Rejeter** → raison sauvegardée
+- 📧 **Email à l'auteur**: "Bravo, accepté!" ou "Malheureusement, rejeté. Raison: ..."
+- [BONUS] **Génération IA**: Catégorie & pitch auto-générés via OpenAI/Claude
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Publications publiques (Jour 11-13)
+- **Page d'accueil**: liste de toutes les publications publiées
+- **Page de détail** (route dynamique `/publications/[slug]`): 
+  - Contenu complet du livre
+  - Auteur, date, catégorie
+  - **Commentaires** (visibles par défaut, modérés post-publication)
+  - **Système de notation** 1-5 étoiles
+  - Note moyenne + nombre d'avis
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 5. Modération post-publication (Jour 13 suite)
+- **Lecteurs** peuvent **signaler un commentaire** (raison + message optionnel)
+- **Dashboard admin**: voir tous les commentaires signalés
+- Admin décide: **Bannir le commentaire** (masquer) ou **Approuver** (rejeter le report)
+- Approche: **post-publication moderation**, pas pré-modération
+  - Les commentaires sont **visibles immédiatement**
+  - Si signalés + jugés problématiques → bannissement
+
+### 6. Notifications (Jour 13)
+- 📧 **Emails via Resend**:
+  - Acceptation manuscrit → email à l'auteur
+  - Rejet manuscrit → email à l'auteur avec raison
+- 🔔 [BONUS] **Notifications in-app**: cloche dans la navbar, marquer comme lues
+
+### 7. Recherche & filtres (Jour 16-18)
+- **Barre de recherche**: par titre/contenu
+- **Filtres**: 
+  - Catégorie (dropdown)
+  - Auteur (dropdown)
+  - Note minimum (slider)
+- Page `/search?q=...&category=...&author=...&minRating=...`
+
+### 8. Gestion d'erreurs (Jour 14-15)
+- **Erreurs custom**: `ValidationError`, `NotFoundError`, `UnauthorizedError`
+- **Nunca** exposer les stack traces internes
+- **Pattern** `{success, error, data}` pour toutes les Server Actions
+- **UX**: messages clairs, actionnables
+
+---
+
+
