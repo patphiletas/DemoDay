@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@better-auth/infra": "^0.2.5",
+    "@tailwindcss/vite": "^4.2.4",
     "@types/pg": "^8.20.0",
     "better-auth": "^1.6.9",
     "drizzle-orm": "^0.45.2",
@@ -34,7 +35,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.2.4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.5"
   }
