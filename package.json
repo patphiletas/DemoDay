@@ -14,6 +14,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@better-auth/infra": "^0.2.5",
     "@types/pg": "^8.20.0",
     "better-auth": "^1.6.9",
     "drizzle-orm": "^0.45.2",
