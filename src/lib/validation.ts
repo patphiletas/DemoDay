@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Auth schemas
+
 export const signupSchema = z.object({
   email: z.string().email("Email invalide"),
   username: z
@@ -21,7 +21,6 @@ export const signinSchema = z.object({
   password: z.string().min(1, "Le mot de passe est requis"),
 });
 
-// Manuscript submission schema
 export const manuscriptSchema = z.object({
   title: z
     .string()
@@ -33,7 +32,6 @@ export const manuscriptSchema = z.object({
   category: z.string().min(1, "La catégorie est requise"),
 });
 
-// Comment schema
 export const commentSchema = z.object({
   content: z
     .string()
@@ -42,13 +40,12 @@ export const commentSchema = z.object({
   publicationId: z.number().int().positive(),
 });
 
-// Rating schema
 export const ratingSchema = z.object({
   score: z.number().int().min(1).max(5),
   publicationId: z.number().int().positive(),
 });
 
-// Report comment schema
+
 export const reportSchema = z.object({
   commentId: z.number().int().positive(),
   reason: z
@@ -57,7 +54,7 @@ export const reportSchema = z.object({
     .max(500, "La raison ne peut pas dépasser 500 caractères"),
 });
 
-// Type exports
+// 
 export type SignupInput = z.infer<typeof signupSchema>;
 export type SigninInput = z.infer<typeof signinSchema>;
 export type ManuscriptInput = z.infer<typeof manuscriptSchema>;

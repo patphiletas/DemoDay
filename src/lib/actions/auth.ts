@@ -21,11 +21,13 @@ export async function signupAction(
     return { success: false, error: result.error.issues[0].message };
   }
 
-  const response = await auth.api.signUpEmail({
-    email: result.data.email,
-    password: result.data.password,
-    name: result.data.username,
-  });
+const response = await auth.api.signUpEmail({
+    body: {
+      email: result.data.email,
+      password: result.data.password,
+      name: result.data.username,
+    },
+});
 
   return response.ok
     ? { success: true }
