@@ -54,7 +54,7 @@ export const reportSchema = z.object({
     .max(500, "La raison ne peut pas dépasser 500 caractères"),
 });
 
-// 
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type SigninInput = z.infer<typeof signinSchema>;
 export type ManuscriptInput = z.infer<typeof manuscriptSchema>;
