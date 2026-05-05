@@ -7,6 +7,7 @@ import { signUp } from '@/lib/auth-client';
 import { signupSchema } from '@/lib/validation';
 import { ZodError } from 'zod';
 
+
 export default function SignupPage() {
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
