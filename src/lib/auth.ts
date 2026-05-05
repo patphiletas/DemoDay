@@ -18,5 +18,5 @@ export const auth = betterAuth({
   trustedOrigins: ["http://localhost:3000", "https://demo-day-wine.vercel.app"],
 });
 
-export type Session = typeof auth.$Inferred.Session;
-export type User = typeof auth.$Inferred.User;
+export type Session = typeof auth.$Infer.Session;
+export type User = typeof auth.$Infer.Session.user;

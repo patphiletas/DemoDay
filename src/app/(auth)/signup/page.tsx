@@ -38,7 +38,7 @@ export default function SignupPage() {
     } catch (error) {
       if (error instanceof ZodError) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           const path = err.path[0];
           newErrors[path as string] = err.message;
         });
@@ -54,9 +54,6 @@ export default function SignupPage() {
           email,
           password,
           name: username,
-          metadata: {
-            username,
-          },
         },
         {
           onRequest: () => {
