@@ -18,7 +18,7 @@ export const users = pgTable("users", {
   role: varchar("role", { length: 20 }).notNull().default("user"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}); 
 
 // Required by Better Auth
 export const sessions = pgTable("sessions", {
