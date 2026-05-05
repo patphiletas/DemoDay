@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { signoutAction } from "@/lib/actions/auth";
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
@@ -39,9 +40,11 @@ export default async function Home() {
               Connexion
             </Link>
             {session && (
-              <Link href="/api/auth/sign-out" className="rounded-full border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                Déconnexion
-              </Link>
+              <form action={signoutAction}>
+                <button type="submit" className="rounded-full border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                  Déconnexion
+                </button>
+              </form>
             )}
           </div>
         </section>

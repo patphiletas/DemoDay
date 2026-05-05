@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { signupSchema, signinSchema } from "@/lib/validation";
 
@@ -100,6 +100,17 @@ export async function signinAction(
   if (!response.ok) {
     return { error: "Email ou mot de passe incorrect." };
   }
+
+  const cookieStore = await cookies();
+  forwardCookies(cookieStore, response.headers);
+  redirect("/");
+}
+
+export async function signoutAction() {
+  const response = await auth.api.signOut({
+    headers: await headers(),
+    asResponse: true,
+  });
 
   const cookieStore = await cookies();
   forwardCookies(cookieStore, response.headers);
