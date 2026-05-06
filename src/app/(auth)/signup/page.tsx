@@ -15,7 +15,7 @@ export default function SignupPage() {
             Créer un compte
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Rejoignez notre maison d'édition
+            Rejoignez notre maison d&apos;édition
           </p>
         </div>
 
@@ -44,7 +44,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Nom d'utilisateur
+                Nom d&apos;utilisateur
               </label>
               <input
                 id="username"
