@@ -2,9 +2,12 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { and, desc, eq } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { manuscripts, publications, ratings } from "@/db/schema";
+import { manuscripts, publications, ratings, users } from "@/db/schema";
+
+const publicationAuthors = alias(users, "publication_authors");
 
 function formatDate(date: Date | null) {
   if (!date) {
@@ -49,9 +52,11 @@ export default async function DashboardPage() {
           pitch: publications.pitch,
           slug: publications.slug,
           score: ratings.score,
+          authorName: publicationAuthors.name,
         })
         .from(ratings)
         .innerJoin(publications, eq(ratings.publicationId, publications.id))
+        .innerJoin(publicationAuthors, eq(publications.authorId, publicationAuthors.id))
         .where(and(eq(ratings.userId, session.user.id), eq(ratings.score, 5)))
         .orderBy(desc(ratings.score), desc(ratings.createdAt))
         .limit(5),
@@ -130,6 +135,9 @@ export default async function DashboardPage() {
                         <h2 className="font-medium">{book.title}</h2>
                         <p className="mt-1 text-xs text-zinc-500">
                           {book.category}
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          par {book.authorName}
                         </p>
                       </div>
                       <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">

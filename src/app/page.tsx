@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { and, avg, count, desc, eq, inArray } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import {
   commentPublicationAction,
   ratePublicationAction,
@@ -9,6 +10,8 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { comments, publications, ratings, users } from "@/db/schema";
+
+const publicationAuthors = alias(users, "publication_authors");
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
@@ -21,8 +24,10 @@ export default async function Home() {
       pitch: publications.pitch,
       coverImageUrl: publications.coverImageUrl,
       publishedAt: publications.publishedAt,
+      authorName: publicationAuthors.name,
     })
     .from(publications)
+    .innerJoin(publicationAuthors, eq(publications.authorId, publicationAuthors.id))
     .where(eq(publications.isVisible, true))
     .orderBy(desc(publications.publishedAt))
     .limit(6);
@@ -109,27 +114,6 @@ export default async function Home() {
           <p className="mt-1 text-zinc-500 dark:text-zinc-400">Lisons différemment…</p>
         </div>
 
-        {/* Session status */}
-        <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-2">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Session</h2>
-          {session ? (
-            <div className="space-y-1 text-sm">
-              <p className="text-green-600 font-medium">Connecté</p>
-              <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
-              <p className="text-zinc-600 dark:text-zinc-400">Email : {session.user.email}</p>
-              <p className="text-zinc-600 dark:text-zinc-400">Email vérifié : {session.user.emailVerified ? "Oui" : "Non"}</p>
-              <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
-              <p className="text-zinc-600 dark:text-zinc-400">Créé le : {session.user.createdAt?.toLocaleDateString()}</p>
-              <p className="text-zinc-600 dark:text-zinc-400">ID : {session.user.id}</p>
-              <p><Link href="/dashboard" className="text-blue-500 hover:underline">
-                Accéder au tableau de bord
-              </Link></p>
-            </div>
-          ) : (
-            <p className="text-sm text-zinc-400">Non connecté</p>
-          )}
-        </section>
-
         <section className="space-y-4">
           <div className="flex items-end justify-between gap-4">
             <div>
@@ -170,6 +154,9 @@ export default async function Home() {
                       <h3 className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
                         {publication.title}
                       </h3>
+                      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                        par {publication.authorName}
+                      </p>
                     </div>
                     <p className="line-clamp-3 text-sm text-zinc-600 dark:text-zinc-400">
                       {publication.pitch}
@@ -307,6 +294,27 @@ export default async function Home() {
             <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950">
               Aucune publication disponible pour le moment.
             </div>
+          )}
+        </section>
+
+        {/* Session status */}
+        <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-2">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Session</h2>
+          {session ? (
+            <div className="space-y-1 text-sm">
+              <p className="text-green-600 font-medium">Connecté</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Email : {session.user.email}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Email vérifié : {session.user.emailVerified ? "Oui" : "Non"}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Créé le : {session.user.createdAt?.toLocaleDateString()}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">ID : {session.user.id}</p>
+              <p><Link href="/dashboard" className="text-blue-500 hover:underline">
+                Accéder au tableau de bord
+              </Link></p>
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-400">Non connecté</p>
           )}
         </section>
 
