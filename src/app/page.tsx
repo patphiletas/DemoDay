@@ -158,9 +158,16 @@ export default async function Home() {
                   </Link>
                   <div className="space-y-3 p-4">
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
-                        {publication.category}
-                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+                          {publication.category}
+                        </p>
+                        {Date.now() - new Date(publication.publishedAt).getTime() < 7 * 24 * 60 * 60 * 1000 && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+                            Nouveauté
+                          </span>
+                        )}
+                      </div>
                       <Link href={`/publications/${publication.slug}`}>
                         <h3 className="mt-1 text-lg font-semibold text-zinc-900 hover:underline underline-offset-2 dark:text-zinc-50">
                           {publication.title}
@@ -168,6 +175,13 @@ export default async function Home() {
                       </Link>
                       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                         par {publication.authorName}
+                      </p>
+                      <p className="mt-0.5 text-xs text-zinc-400">
+                        {new Date(publication.publishedAt).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}
                       </p>
                     </div>
                     <p className="line-clamp-3 text-sm text-zinc-600 dark:text-zinc-400">
