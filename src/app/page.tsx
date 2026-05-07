@@ -1,7 +1,5 @@
 import { headers } from "next/headers";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { signoutAction } from "@/lib/actions/auth";
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
@@ -20,34 +18,19 @@ export default async function Home() {
           {session ? (
             <div className="space-y-1 text-sm">
               <p className="text-green-600 font-medium">Connecté</p>
-              <p className="text-zinc-600 dark:text-zinc-400">Email : {session.user.email}</p>
               <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Email : {session.user.email}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Email vérifié : {session.user.emailVerified ? "Oui" : "Non"}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
+              <p className="text-zinc-600 dark:text-zinc-400">Créé le : {session.user.createdAt?.toLocaleDateString()}</p>
               <p className="text-zinc-600 dark:text-zinc-400">ID : {session.user.id}</p>
+              
             </div>
           ) : (
             <p className="text-sm text-zinc-400">Non connecté</p>
           )}
         </section>
-
-        {/* Auth */}
-        <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Auth</h2>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/signup" className="rounded-full bg-zinc-900 dark:bg-zinc-50 px-4 py-2 text-sm font-medium text-white dark:text-zinc-900 hover:opacity-80 transition-opacity">
-              Inscription
-            </Link>
-            <Link href="/signin" className="rounded-full border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-              Connexion
-            </Link>
-            {session && (
-              <form action={signoutAction}>
-                <button type="submit" className="rounded-full border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                  Déconnexion
-                </button>
-              </form>
-            )}
-          </div>
-        </section>
+  
 
         {/* Tables */}
         {/* <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-3">
