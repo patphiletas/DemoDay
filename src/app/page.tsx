@@ -24,7 +24,9 @@ export default async function Home() {
               <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
               <p className="text-zinc-600 dark:text-zinc-400">Créé le : {session.user.createdAt?.toLocaleDateString()}</p>
               <p className="text-zinc-600 dark:text-zinc-400">ID : {session.user.id}</p>
-              
+              <p><a href="/dashboard" className="text-blue-500 hover:underline">
+                Accéder au tableau de bord
+              </a></p>
             </div>
           ) : (
             <p className="text-sm text-zinc-400">Non connecté</p>
