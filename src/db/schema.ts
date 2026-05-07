@@ -84,6 +84,7 @@ export const publications = pgTable("publications", {
   content: text("content").notNull(),
   category: varchar("category", { length: 100 }).notNull(),
   pitch: text("pitch").notNull(),
+  coverImageUrl: text("cover_image_url"),
   authorId: text("author_id")
     .notNull()
     .references(() => users.id),

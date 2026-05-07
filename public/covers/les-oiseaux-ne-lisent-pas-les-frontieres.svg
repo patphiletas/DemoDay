@@ -1,0 +1,11 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="1200" fill="#ECFDF5"/>
+  <rect x="72" y="88" width="756" height="1024" rx="28" fill="#064E3B"/>
+  <path d="M150 646C264 514 374 448 480 448C586 448 672 500 738 604" stroke="#D1FAE5" stroke-width="18" stroke-linecap="round"/>
+  <path d="M208 540C274 486 334 458 388 456C442 454 494 478 544 528" stroke="#A7F3D0" stroke-width="14" stroke-linecap="round"/>
+  <path d="M522 514C578 462 632 438 684 442C736 446 780 476 816 532" stroke="#A7F3D0" stroke-width="14" stroke-linecap="round"/>
+  <path d="M168 756H732" stroke="#D1FAE5" stroke-width="10" stroke-dasharray="24 22" stroke-linecap="round"/>
+  <text x="450" y="184" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#D1FAE5">Les oiseaux ne lisent</text>
+  <text x="450" y="242" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="700" fill="#D1FAE5">pas les frontieres</text>
+  <text x="450" y="1032" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" letter-spacing="6" fill="#A7F3D0">ALTERNATIVE</text>
+</svg>
