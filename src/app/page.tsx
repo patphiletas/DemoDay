@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { HorizontalScroll } from "@/components/HorizontalScroll";
 import { and, avg, count, desc, eq, inArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
@@ -127,33 +128,44 @@ export default async function Home() {
           </div>
 
           {featuredPublications.length > 0 ? (
-            <div className="flex snap-x gap-4 overflow-x-auto pb-3">
+            <HorizontalScroll>
               {featuredPublications.map((publication) => (
                 <article
                   key={publication.id}
                   className="min-w-[260px] snap-start overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:min-w-[320px]"
                 >
-                  <div className="aspect-[3/4] bg-zinc-100 dark:bg-zinc-900">
-                    <Image
-                      src={
-                        publication.coverImageUrl ??
-                        `/covers/${publication.slug}.svg`
-                      }
-                      alt={`Couverture de ${publication.title}`}
-                      width={900}
-                      height={1200}
-                      className="h-full w-full object-cover"
-                      unoptimized
-                    />
-                  </div>
+                  <Link href={`/publications/${publication.slug}`} className="block aspect-3/4 bg-zinc-100 dark:bg-zinc-900">
+                    {publication.coverImageUrl ? (
+                      <Image
+                        src={publication.coverImageUrl}
+                        alt={`Couverture de ${publication.title}`}
+                        width={900}
+                        height={1200}
+                        className="h-full w-full object-cover transition-opacity hover:opacity-90"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col justify-end bg-linear-to-br from-zinc-600 to-zinc-900 p-5 transition-opacity hover:opacity-90">
+                        <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">
+                          {publication.category}
+                        </p>
+                        <p className="mt-2 text-lg font-semibold leading-snug text-white">
+                          {publication.title}
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-300">{publication.authorName}</p>
+                      </div>
+                    )}
+                  </Link>
                   <div className="space-y-3 p-4">
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
                         {publication.category}
                       </p>
-                      <h3 className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                        {publication.title}
-                      </h3>
+                      <Link href={`/publications/${publication.slug}`}>
+                        <h3 className="mt-1 text-lg font-semibold text-zinc-900 hover:underline underline-offset-2 dark:text-zinc-50">
+                          {publication.title}
+                        </h3>
+                      </Link>
                       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                         par {publication.authorName}
                       </p>
@@ -289,7 +301,7 @@ export default async function Home() {
                   </div>
                 </article>
               ))}
-            </div>
+            </HorizontalScroll>
           ) : (
             <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950">
               Aucune publication disponible pour le moment.
