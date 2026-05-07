@@ -50,7 +50,7 @@ export default async function Home() {
         </section>
 
         {/* Tables */}
-        <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-3">
+        {/* <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-3">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Tables DB</h2>
           <div className="grid grid-cols-2 gap-2 text-sm">
             {[
@@ -68,7 +68,7 @@ export default async function Home() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
       </main>
     </div>
   );
