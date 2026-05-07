@@ -7,7 +7,6 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 
-// Better Auth requires text IDs and specific columns
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -20,7 +19,6 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }); 
 
-// Required by Better Auth
 export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
@@ -84,7 +82,6 @@ export const publications = pgTable("publications", {
   content: text("content").notNull(),
   category: varchar("category", { length: 100 }).notNull(),
   pitch: text("pitch").notNull(),
-  coverImageUrl: text("cover_image_url"),
   authorId: text("author_id")
     .notNull()
     .references(() => users.id),
