@@ -1,0 +1,181 @@
+# Protéger une page connectée avec Better Auth + Next.js
+
+Objectif : empêcher les utilisateurs non connectés d’accéder à certaines pages, par exemple `/dashboard` ou `/submit`.
+
+## 1. Choisir la page à protéger
+
+Exemples de pages privées :
+
+- `/dashboard`
+- `/submit`
+- `/profile`
+- `/admin`
+
+Pour commencer, le plus simple est de créer une page `/dashboard`.
+
+Structure attendue :
+
+```txt
+src/app/dashboard/page.tsx
+2. Lire la session côté serveur
+Dans une page App Router, on récupère la session avec Better Auth :
+
+tsx
+
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+
+export default async function DashboardPage() {
+  const session = await auth.api
+    .getSession({ headers: await headers() })
+    .catch(() => null);
+
+  if (!session) {
+    redirect("/signin");
+  }
+
+  return (
+    <main>
+      <h1>Dashboard</h1>
+      <p>Bienvenue {session.user.name}</p>
+    </main>
+  );
+}
+3. Comprendre ce que fait la protection
+Cette partie est la vraie protection :
+
+ts
+
+if (!session) {
+  redirect("/signin");
+}
+Elle signifie :
+
+si une session existe, la page s’affiche
+si aucune session n’existe, l’utilisateur est envoyé vers /signin
+même si l’utilisateur tape directement /dashboard dans l’URL, il sera bloqué
+même après refresh, la session est relue depuis les cookies
+4. Ajouter un lien dans la navbar
+Une fois la page protégée créée, on peut afficher un lien seulement si l’utilisateur est connecté.
+
+Dans Navbar.tsx, dans le bloc :
+
+tsx
+
+{session ? (
+  <>
+    ...
+  </>
+) : (
+  <>
+    ...
+  </>
+)}
+On peut ajouter :
+
+tsx
+
+<Link href="/dashboard" className="text-sm hover:underline">
+  Dashboard
+</Link>
+Exemple :
+
+tsx
+
+{session ? (
+  <>
+    <Link href="/dashboard" className="text-sm hover:underline">
+      Dashboard
+    </Link>
+
+    <span className="text-sm text-gray-600">{session.user.name}</span>
+
+    <form action={signoutAction}>
+      <button type="submit" className="text-sm text-red-500 hover:underline">
+        Se déconnecter
+      </button>
+    </form>
+  </>
+) : (
+  <>
+    <Link href="/signin" className="text-sm hover:underline">
+      Connexion
+    </Link>
+
+    <Link
+      href="/signup"
+      className="text-sm bg-black text-white px-3 py-1 rounded hover:bg-gray-800"
+    >
+      S&apos;inscrire
+    </Link>
+  </>
+)}
+5. Tester le comportement
+Scénario à tester :
+
+Se déconnecter.
+Aller directement sur /dashboard.
+Vérifier qu’on est redirigé vers /signin.
+Se connecter.
+Aller sur /dashboard.
+Vérifier que la page s’affiche.
+Refresh la page.
+Vérifier qu’on reste sur /dashboard.
+Se déconnecter.
+Essayer de revenir sur /dashboard.
+Vérifier qu’on est redirigé vers /signin.
+6. Réutiliser la logique sur d’autres pages
+Pour protéger une autre page, il suffit de reprendre ce bloc :
+
+tsx
+
+const session = await auth.api
+  .getSession({ headers: await headers() })
+  .catch(() => null);
+
+if (!session) {
+  redirect("/signin");
+}
+Puis de construire la page normalement après cette vérification.
+
+7. Option plus propre plus tard
+Quand plusieurs pages seront protégées, on pourra extraire un helper :
+
+ts
+
+// src/lib/require-session.ts
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+
+export async function requireSession() {
+  const session = await auth.api
+    .getSession({ headers: await headers() })
+    .catch(() => null);
+
+  if (!session) {
+    redirect("/signin");
+  }
+
+  return session;
+}
+Ensuite, dans une page protégée :
+
+tsx
+
+import { requireSession } from "@/lib/require-session";
+
+export default async function DashboardPage() {
+  const session = await requireSession();
+
+  return (
+    <main>
+      <h1>Dashboard</h1>
+      <p>Bienvenue {session.user.name}</p>
+    </main>
+  );
+}
+Cette version évite de répéter la même logique partout.
+
+
