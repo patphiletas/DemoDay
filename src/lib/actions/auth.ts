@@ -28,10 +28,6 @@ export async function signupAction(
     await auth.api.signUpEmail({
       body: {
 
-
-
-
-        
         email: result.data.email,
         password: result.data.password,
         name: result.data.username,
