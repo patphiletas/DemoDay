@@ -118,7 +118,7 @@ export function PublicationCard({
           )}
         </div>
 
-        {isLoggedIn ? (
+        {/* {isLoggedIn ? (
           <div className="space-y-4 border-t border-zinc-100 pt-4 dark:border-zinc-700">
             <form action={ratePublicationAction} className="space-y-2">
               <input type="hidden" name="publicationId" value={publication.id} />
@@ -176,7 +176,7 @@ export function PublicationCard({
           >
             Connectez-vous pour noter et commenter
           </Link>
-        )}
+        )} */}
 
         <div className="space-y-2 border-t border-zinc-100 pt-4 dark:border-zinc-700">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
