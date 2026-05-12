@@ -14,7 +14,7 @@ type Props = {
 
 export function SessionPanel({ session }: Props) {
   return (
-    <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 space-y-2">
+    <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-5 space-y-2">
       <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Session</h2>
       {session ? (
         <div className="space-y-1 text-sm">

@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { and, avg, count, desc, eq, inArray } from "drizzle-orm";
+import { and, avg, count, desc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Link from "next/link";
 import {
@@ -122,7 +122,7 @@ export default async function PublicationPage({
 
         {/* Rating + commentaire */}
         {session ? (
-          <div className="space-y-6 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+          <div className="space-y-6 border-t border-zinc-200 pt-8 dark:border-zinc-700">
             <div className="space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
                 Votre note
@@ -138,7 +138,7 @@ export default async function PublicationPage({
                     className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
                       userRating?.score === score
                         ? "border-amber-300 bg-amber-100 text-amber-800"
-                        : "border-zinc-200 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                        : "border-zinc-200 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
                     }`}
                   >
                     {score}
@@ -162,7 +162,7 @@ export default async function PublicationPage({
                 maxLength={500}
                 required
                 placeholder="Votre commentaire…"
-                className="w-full resize-none rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+                className="w-full resize-none rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
               />
               <button
                 type="submit"
@@ -173,7 +173,7 @@ export default async function PublicationPage({
             </form>
           </div>
         ) : (
-          <div className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
+          <div className="border-t border-zinc-200 pt-8 dark:border-zinc-700">
             <Link
               href="/signin"
               className="text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-50"
@@ -184,7 +184,7 @@ export default async function PublicationPage({
         )}
 
         {/* Commentaires */}
-        <div className="space-y-4 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+        <div className="space-y-4 border-t border-zinc-200 pt-8 dark:border-zinc-700">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
             Commentaires ({allComments.length})
           </h2>

@@ -110,7 +110,7 @@ export default async function AdminPage() {
               {pendingManuscripts.map((m) => (
                 <div
                   key={m.id}
-                  className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"
+                  className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950"
                 >
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
@@ -193,9 +193,9 @@ export default async function AdminPage() {
           {allPublications.length === 0 ? (
             <p className="text-sm text-zinc-400">Aucune publication.</p>
           ) : (
-            <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+            <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700">
               <table className="w-full text-sm">
-                <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
+                <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-zinc-500">Titre</th>
                     <th className="px-4 py-3 text-left font-medium text-zinc-500">Auteur</th>
@@ -269,8 +269,8 @@ export default async function AdminPage() {
                   key={c.id}
                   className={`flex items-start gap-4 rounded-xl border p-4 ${
                     c.isDeleted
-                      ? "border-zinc-100 bg-zinc-50 opacity-50 dark:border-zinc-800 dark:bg-zinc-900"
-                      : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+                      ? "border-zinc-100 bg-zinc-50 opacity-50 dark:border-zinc-700 dark:bg-zinc-900"
+                      : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
                   }`}
                 >
                   <div className="flex-1 space-y-1">
