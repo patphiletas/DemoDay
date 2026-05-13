@@ -22,6 +22,8 @@
 
 AlterNative est une plateforme full-stack de gestion de publications : les auteurs soumettent des manuscrits, les admins les acceptent ou rejettent, et les lecteurs peuvent noter et commenter les œuvres publiées. Le projet couvre auth, BDD relationnelle, Server Actions, CI/CD et mode sombre.
 
+lien vers la démo : https://demo-day-wine.vercel.app/
+
 ---
 
 ## Fonctionnalités
