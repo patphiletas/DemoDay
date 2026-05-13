@@ -1,84 +1,182 @@
-# 📚 Projet Alternative
+<div align="center">
 
-## Maison d'Édition Fictive
+# 📚 AlterNative
 
-> Une plateforme complète de **soumission, publication et modération de manuscrits** avec authentification, commentaires, notation et notifications par email.
+**Une maison d'édition fictive — soumettre, publier, lire.**
 
-https://demo-day-wine.vercel.app/
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel)](https://demo-day-wine.vercel.app/)
+&nbsp;
+[![Next.js](https://img.shields.io/badge/Next.js%2016-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+&nbsp;
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+&nbsp;
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
+&nbsp;
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS%20v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
-
-### 🎓 Objectifs pédagogiques
-
-| # | Concept | Stack |
-|---|---------|-------|
-| 1️⃣ | Routes dynamiques | `/publications/[slug]` |
-| 2️⃣ | BDD + migrations | Drizzle ORM + PostgreSQL |
-| 3️⃣ | Auth + protections | Better Auth + sessions HTTP-only |
-| 4️⃣ | Validation serveur | Zod schemas |
-| 5️⃣ | Tests unitaires | Vitest (min 5 tests) |
-| 6️⃣ | CI/CD | GitHub Actions + Vercel |
-| 7️⃣ | Gestion erreurs | Custom error classes, UX-friendly |
+</div>
 
 ---
 
-## 🏗️ Fonctionnalités principales
+## Aperçu
 
-### 1. Authentification (Jour 3-5)
-- **Signup**: Créer un compte avec email, username, password
-- **Signin**: Se connecter et rester authentifié via cookies HTTP-only
-- **Signout**: Déconnexion sécurisée
-- **Session persistance**: Rester connecté après refresh
-
-### 2. Soumission de manuscrits (Jour 6-8)
-- **Users connectés** peuvent soumettre un manuscrit
-- Formulaire: Titre, contenu (markdown), catégorie
-- Stockage en BDD avec status: `submitted`
-- Page "Mes soumissions": voir l'état de chaque manuscrit
-
-### 3. Système d'acceptation/rejet (Jour 9-10)
-- **Admin dashboard**: lister tous les manuscrits en attente
-- Voir le détail complet d'un manuscrit
-- Boutons: **Accepter** → crée une publication | **Rejeter** → raison sauvegardée
-- 📧 **Email à l'auteur**: "Bravo, accepté!" ou "Malheureusement, rejeté. Raison: ..."
-- [BONUS] **Génération IA**: Catégorie & pitch auto-générés via OpenAI/Claude
-
-### 4. Publications publiques (Jour 11-13)
-- **Page d'accueil**: liste de toutes les publications publiées
-- **Page de détail** (route dynamique `/publications/[slug]`): 
-  - Contenu complet du livre
-  - Auteur, date, catégorie
-  - **Commentaires** (visibles par défaut, modérés post-publication)
-  - **Système de notation** 1-5 étoiles
-  - Note moyenne + nombre d'avis
-
-### 5. Modération post-publication (Jour 13 suite)
-- **Lecteurs** peuvent **signaler un commentaire** (raison + message optionnel)
-- **Dashboard admin**: voir tous les commentaires signalés
-- Admin décide: **Bannir le commentaire** (masquer) ou **Approuver** (rejeter le report)
-- Approche: **post-publication moderation**, pas pré-modération
-  - Les commentaires sont **visibles immédiatement**
-  - Si signalés + jugés problématiques → bannissement
-
-### 6. Notifications (Jour 13)
-- 📧 **Emails via Resend**:
-  - Acceptation manuscrit → email à l'auteur
-  - Rejet manuscrit → email à l'auteur avec raison
-- 🔔 [BONUS] **Notifications in-app**: cloche dans la navbar, marquer comme lues
-
-### 7. Recherche & filtres (Jour 16-18)
-- **Barre de recherche**: par titre/contenu
-- **Filtres**: 
-  - Catégorie (dropdown)
-  - Auteur (dropdown)
-  - Note minimum (slider)
-- Page `/search?q=...&category=...&author=...&minRating=...`
-
-### 8. Gestion d'erreurs (Jour 14-15)
-- **Erreurs custom**: `ValidationError`, `NotFoundError`, `UnauthorizedError`
-- **Nunca** exposer les stack traces internes
-- **Pattern** `{success, error, data}` pour toutes les Server Actions
-- **UX**: messages clairs, actionnables
+AlterNative est une plateforme full-stack de gestion de publications : les auteurs soumettent des manuscrits, les admins les acceptent ou rejettent, et les lecteurs peuvent noter et commenter les œuvres publiées. Le projet couvre auth, BDD relationnelle, Server Actions, CI/CD et mode sombre.
 
 ---
 
+## Fonctionnalités
 
+| Fonctionnalité | Description |
+|---|---|
+| 🔐 Authentification | Signup / signin / signout via Better Auth, sessions HTTP-only |
+| 📝 Soumission de manuscrits | Formulaire avec validation Zod, statuts `submitted / reviewing / accepted / rejected` |
+| 🏠 Homepage | Carousel horizontal des publications, notation et commentaires en session |
+| 📖 Page de lecture | Route dynamique `/publications/[slug]`, contenu complet, rating 1-5 étoiles |
+| 🛡️ Dashboard admin | Gestion des manuscrits en attente, modération des commentaires, visibilité des publications |
+| 👤 Dashboard perso | Manuscrits soumis, livres notés 5★, publications acceptées |
+| 🌙 Mode sombre | Basculement manuel + respect de `prefers-color-scheme`, sans flash au chargement |
+| ✅ Tests & CI/CD | Vitest + GitHub Actions (lint + tests sur chaque push) + déploiement Vercel |
+
+---
+
+## Stack technique
+
+| Couche | Technologie |
+|---|---|
+| Framework | Next.js 16.2.4 (App Router, Server Components, Server Actions) |
+| Langage | TypeScript |
+| Style | Tailwind CSS v4 |
+| Base de données | PostgreSQL via [Neon](https://neon.tech) + Drizzle ORM |
+| Auth | [Better Auth](https://www.better-auth.com) ^1.6.9 |
+| Validation | Zod v4 |
+| Tests | Vitest v4 |
+| CI/CD | GitHub Actions + Vercel |
+
+---
+
+## Structure du projet
+
+```
+demoday/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/          # signin, signup
+│   │   ├── admin/           # dashboard admin
+│   │   ├── dashboard/       # dashboard utilisateur
+│   │   ├── manuscripts/     # soumission de manuscrit
+│   │   ├── publications/    # [slug] — page de lecture
+│   │   ├── layout.tsx       # root layout + ThemeProvider
+│   │   └── page.tsx         # homepage carousel
+│   ├── components/          # Navbar, ThemeToggle, ...
+│   ├── db/
+│   │   └── schema.ts        # tables Drizzle
+│   └── lib/
+│       ├── actions/         # server actions (auth, manuscripts, admin, interactions)
+│       ├── auth.ts          # config Better Auth
+│       ├── db.ts            # client Drizzle
+│       └── validation.ts    # schemas Zod + types inférés
+├── .github/
+│   └── workflows/
+│       └── learn-github-actions.yml  # CI : npm ci + npm test
+└── drizzle.config.ts
+```
+
+---
+
+## Schéma de base de données
+
+```
+users               manuscripts             publications
+─────               ───────────             ────────────
+id                  id                      id
+name                title                   slug
+email               content                 title
+username            category                content
+role ────────────── authorId (FK)           category
+                    status                  pitch
+                    submittedAt             coverImageUrl
+                    reviewedAt              authorId (FK)
+sessions            rejectionReason         publishedAt
+accounts                                    isVisible
+verifications       comments                ratings
+                    ──────────              ───────
+                    id                      id
+                    content                 score (1–5)
+                    publicationId (FK)      publicationId (FK)
+                    authorId (FK)           userId (FK)
+                    isModerated
+                    isDeleted               notifications
+                                            ─────────────
+                    reports                 id
+                    ───────                 userId (FK)
+                    id                      type
+                    commentId (FK)          message
+                    reporterId (FK)         isRead
+                    reason
+                    isHandled
+```
+
+---
+
+## Installation
+
+```bash
+npm install
+```
+
+**`.env.local`**
+```env
+DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
+BETTER_AUTH_SECRET=your_secret
+BETTER_AUTH_URL=http://localhost:3000
+RESEND_API_KEY=your_resend_key      # optionnel — emails d'acceptation/rejet
+```
+
+---
+
+## Lancement
+
+```bash
+# Migrations BDD
+npm run db:push
+
+# Serveur de développement
+npm run dev
+```
+
+- App : `http://localhost:3000`
+
+---
+
+## Tests & CI
+
+```bash
+npm test          # Vitest en mode watch
+npm run test:ui   # Interface Vitest UI
+```
+
+Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exécute à chaque push :
+1. `npm ci`
+2. `npm test`
+
+---
+
+## Objectifs pédagogiques
+
+| # | Concept | Implémentation |
+|---|---------|----------------|
+| 1 | Routes dynamiques | `/publications/[slug]` |
+| 2 | BDD + migrations | Drizzle ORM + PostgreSQL (Neon) |
+| 3 | Auth + protections | Better Auth + sessions HTTP-only |
+| 4 | Validation serveur | Zod v4 schemas |
+| 5 | Tests unitaires | Vitest — validation schemas |
+| 6 | CI/CD | GitHub Actions + Vercel |
+| 7 | Mode sombre | `ThemeToggle` + `prefers-color-scheme` + Tailwind `dark:` |
+
+---
+
+<div align="center">
+
+Projet pédagogique ADA Demoday · Patrice Philétas 2026
+
+</div>
