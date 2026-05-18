@@ -71,7 +71,8 @@ demoday/
 │   │   └── page.tsx         # homepage carousel
 │   ├── components/          # Navbar, ThemeToggle, ...
 │   ├── db/
-│   │   └── schema.ts        # tables Drizzle
+│   │   ├── schema.ts        # tables Drizzle
+│   │   └── migrations/      # migrations SQL générées
 │   └── lib/
 │       ├── actions/         # server actions (auth, manuscripts, admin, interactions)
 │       ├── auth.ts          # config Better Auth
@@ -80,6 +81,7 @@ demoday/
 ├── .github/
 │   └── workflows/
 │       └── learn-github-actions.yml  # CI : npm ci + npm test
+├── docker-compose.yml       # PostgreSQL local (alternative à Neon)
 └── drizzle.config.ts
 ```
 
@@ -133,6 +135,9 @@ BETTER_AUTH_SECRET=your_secret
 BETTER_AUTH_URL=http://localhost:3000
 RESEND_API_KEY=your_resend_key      # optionnel — emails d'acceptation/rejet
 ```
+
+> **PostgreSQL local (optionnel)** — le `docker-compose.yml` lance un PostgreSQL sur le port 5433.
+> `DATABASE_URL=postgresql://Pat:password@localhost:5433/mydatabase`
 
 ---
 

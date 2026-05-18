@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1777295673381,
-      "tag": "0000_smiling_lord_tyger",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1791600000000,
-      "tag": "0001_add_publication_cover_image_url",
+      "when": 1779096109486,
+      "tag": "0000_crazy_khan",
       "breakpoints": true
     }
   ]
