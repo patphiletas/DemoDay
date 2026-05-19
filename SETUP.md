@@ -29,7 +29,8 @@
 
 ### Services externes
 - [x] Resend installé (pour emails)
-- [ ] Clé RESEND_API_KEY à ajouter dans `.env.local`
+- [x] Clé RESEND_API_KEY ajoutée dans `.env.local`
+- [x] Emails transactionnels implémentés (bienvenue, acceptation, refus)
 
 ### Scripts disponibles
 ```bash
@@ -46,60 +47,29 @@ npm run test:ui         # Lancer les tests avec UI
 
 ---
 
-## ❌ À faire
+## ✅ Tout est en place
 
-### 1. Configuration BDD
-- [ ] Créer une BDD PostgreSQL (Neon)
-- [ ] Mettre à jour `DATABASE_URL` dans `.env.local`
-- [ ] Générer et appliquer les migrations
-  ```bash
-  npm run db:generate
-  npm run db:migrate
-  ```
+### Fonctionnalités complètes
+- [x] BDD PostgreSQL Neon + migrations Drizzle
+- [x] Better Auth (signup / signin / signout)
+- [x] Homepage, pages auth, soumission, admin, dashboard perso
+- [x] Acceptance/rejet + publications publiques
+- [x] Commentaires, notation, signalements
+- [x] Emails transactionnels (Resend)
+- [x] Notifications in-app
+- [x] Mode sombre
+- [x] Tests Vitest + GitHub Actions CI
+- [x] Déployé sur Vercel
 
-### 2. Better Auth
-- [ ] Créer `src/lib/auth.ts` et configurer Better Auth
-- [ ] Implémenter les Server Actions pour signup/signin/signout
-
-### 3. Pages & UI
-- [ ] Page d'accueil (liste des publications)
-- [ ] Pages d'auth (signin, signup)
-- [ ] Page de soumission de manuscrit
-- [ ] Interface admin
-
-### 4. Fonctionnalités core (Semaine 1-3)
-- [ ] Authentification complète
-- [ ] Soumission de manuscrits
-- [ ] Acceptance/rejet par admin
-- [ ] Publications publiques
-- [ ] Commentaires & modération
-- [ ] Système de notation
+### Reste à faire
 - [ ] Recherche & filtres
-
-### 5. Tests & CI/CD (Semaine 4)
-- [ ] Écrire les tests (minimum 5)
-- [ ] Configurer GitHub Actions
-- [ ] Déployer sur Vercel
-
-### 6. Bonus
-- [ ] API IA pour catégorisation & pitch
-- [ ] Features additionnelles
+- [ ] Gestion d'erreurs centralisée (`errors.ts` + `error.tsx`)
 
 ---
 
 ## 📖 Ressources
 
-- Roadmap complète : `../portfolio-patphiletas/PROJET_ALTERNATIVE_ROADMAP.md`
 - Better Auth : http://better-auth.com/
 - Drizzle ORM : https://orm.drizzle.team/
 - Zod : https://zod.dev/
-
----
-
-## 🚀 Prochaines étapes
-
-1. Mettre en place Neon PostgreSQL
-2. Configurer Better Auth
-3. Suivre le roadmap semaine par semaine
-
-Bonne chance ! 🎓
+- Resend : https://resend.com/docs

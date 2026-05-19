@@ -31,11 +31,13 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 | Fonctionnalité | Description |
 |---|---|
 | 🔐 Authentification | Signup / signin / signout via Better Auth, sessions HTTP-only |
-| 📝 Soumission de manuscrits | Formulaire avec validation Zod, statuts `submitted / reviewing / accepted / rejected` |
+| 📝 Soumission de manuscrits | Formulaire avec validation Zod, statuts `submitted / accepted / rejected` |
 | 🏠 Homepage | Carousel horizontal des publications, notation et commentaires en session |
 | 📖 Page de lecture | Route dynamique `/publications/[slug]`, contenu complet, rating 1-5 étoiles |
 | 🛡️ Dashboard admin | Gestion des manuscrits en attente, modération des commentaires, visibilité des publications |
 | 👤 Dashboard perso | Manuscrits soumis, livres notés 5★, publications acceptées |
+| 📧 Emails transactionnels | Resend — confirmation d'inscription, notification d'acceptation/refus de manuscrit |
+| 🔔 Notifications in-app | Cloche en navbar, notifications de décision éditoriale |
 | 🌙 Mode sombre | Basculement manuel + respect de `prefers-color-scheme`, sans flash au chargement |
 | ✅ Tests & CI/CD | Vitest + GitHub Actions (lint + tests sur chaque push) + déploiement Vercel |
 
@@ -51,6 +53,7 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 | Base de données | PostgreSQL via [Neon](https://neon.tech) + Drizzle ORM |
 | Auth | [Better Auth](https://www.better-auth.com) ^1.6.9 |
 | Validation | Zod v4 |
+| Emails | [Resend](https://resend.com) ^6 |
 | Tests | Vitest v4 |
 | CI/CD | GitHub Actions + Vercel |
 
@@ -77,6 +80,7 @@ demoday/
 │       ├── actions/         # server actions (auth, manuscripts, admin, interactions)
 │       ├── auth.ts          # config Better Auth
 │       ├── db.ts            # client Drizzle
+│       ├── email.ts         # emails transactionnels Resend (bienvenue, acceptation, refus)
 │       └── validation.ts    # schemas Zod + types inférés
 ├── .github/
 │   └── workflows/
@@ -133,7 +137,8 @@ npm install
 DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
 BETTER_AUTH_SECRET=your_secret
 BETTER_AUTH_URL=http://localhost:3000
-RESEND_API_KEY=your_resend_key      # optionnel — emails d'acceptation/rejet
+NEXT_PUBLIC_APP_URL=http://localhost:3000   # URL publique (utilisée dans les liens emails)
+RESEND_API_KEY=your_resend_key              # emails transactionnels via Resend
 ```
 
 > **PostgreSQL local (optionnel)** — le `docker-compose.yml` lance un PostgreSQL sur le port 5433.
@@ -179,6 +184,7 @@ Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exé
 | 5 | Tests unitaires | Vitest — validation schemas |
 | 6 | CI/CD | GitHub Actions + Vercel |
 | 7 | Mode sombre | `ThemeToggle` + `prefers-color-scheme` + Tailwind `dark:` |
+| + | Emails transactionnels | Resend — bienvenue, acceptation, refus manuscrit |
 
 ---
 

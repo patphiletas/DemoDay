@@ -1,119 +1,74 @@
-# 📊 Statut du Projet Alternative
+# 📊 Statut du Projet AlterNative
 
-**Status global**: ⏳ Fondations terminées, auth en place, métier à démarrer  
-**Semaine**: Jour 3-5 terminé / prêt pour Jour 6-8  
-**Date de départ**: 2026-04-27
-**Dernière mise à jour**: 2026-05-06
-
----
-
-## 🎯 Semaine 1: Fondations & Auth
-
-### Jour 1-2: Initialisation ✅
-- [x] Projet Next.js créé
-- [x] Dépendances installées
-- [x] Drizzle ORM configuré
-- [x] Schéma BDD défini
-- [x] Zod schemas créés
-- [x] Structure de dossiers mise en place
-
-**À faire avant le jour 3**:
-- [x] BDD PostgreSQL (Neon) créée
-- [x] `.env.local` complété avec DATABASE_URL
-- [x] Migrations générées et appliquées
-
-### Jour 3-5: Authentification Better Auth
-- [x] Better Auth configuré
-- [x] Route API `/api/auth/[...auth]` créée
-- [x] Pages signup/signin créées
-- [x] Server Actions pour signup/signin/signout
-- [x] Cookies de session transmis après auth
-- [x] Redirections après signup/signin/signout
-- [ ] Navbar avec état auth
-- [ ] Protection des routes privées
+**Status global**: ✅ Projet complet — déployé en production  
+**Date de départ**: 2026-04-27  
+**Dernière mise à jour**: 2026-05-19
 
 ---
 
-## 📝 Jour 6-8: Soumission de manuscrits
-- [ ] Page de soumission créée
-- [ ] Formulaire + Zod validation
-- [ ] Server Action submitManuscript
-- [ ] Page "Mes soumissions"
+## ✅ Fonctionnalités terminées
 
----
+### Authentification
+- [x] Better Auth configuré (Drizzle adapter, sessions HTTP-only)
+- [x] Pages signup / signin
+- [x] Server Actions signup / signin / signout avec validation Zod
+- [x] Navbar avec état auth
+- [x] Routes privées protégées (redirect si non connecté)
 
-## 👨‍⚖️ Jour 9-10: Admin Dashboard
-- [ ] Middleware de protection admin
-- [ ] Dashboard admin
-- [ ] Route dynamique [id] pour review
-- [ ] Accept/Reject Server Actions
-- [ ] [BONUS] Appel IA pour catégorie & pitch
+### Soumission de manuscrits
+- [x] Page de soumission (`/manuscripts/submit`)
+- [x] Formulaire + validation Zod (titre, contenu, catégorie)
+- [x] Server Action `submitManuscriptAction`
+- [x] Dashboard perso : manuscrits soumis, statuts, publications acceptées
 
----
+### Dashboard admin
+- [x] Accès restreint par rôle (`role === "admin"`)
+- [x] Acceptation de manuscrit → création publication + notification + email
+- [x] Rejet de manuscrit → raison + notification + email
+- [x] Dépublication / toggle visibilité
+- [x] Modération des commentaires (soft delete, restore)
+- [x] Gestion des signalements (reports)
 
-## 📚 Semaine 3: Publications & Commentaires
+### Publications & interactions
+- [x] Homepage avec carousel horizontal des publications
+- [x] Route dynamique `/publications/[slug]`
+- [x] Système de notation 1–5 étoiles (unique par user)
+- [x] Commentaires avec modération
+- [x] Signalement de commentaires
 
-### Jour 11-13
-- [ ] Accueil avec liste publications
-- [ ] Route dynamique [slug]
-- [ ] Formulaire commentaires
-- [ ] Système de notation
-- [ ] Agrégation note moyenne
+### Emails transactionnels (Resend)
+- [x] Email de bienvenue à l'inscription
+- [x] Email d'acceptation de manuscrit (avec note éditoriale + lien publication)
+- [x] Email de refus de manuscrit (avec raison)
 
-### Jour 14-15: Gestion d'erreurs
-- [ ] Classes d'erreurs custom
-- [ ] Page error.tsx
-- [ ] Gestion d'erreurs dans Server Actions
+### Notifications in-app
+- [x] Table `notifications` en BDD
+- [x] Notifications créées à l'acceptation / refus
 
----
+### UX & accessibilité
+- [x] Mode sombre (ThemeToggle + `prefers-color-scheme` + Tailwind `dark:`)
+- [x] Pas de flash au chargement
 
-## 🔍 Semaine 4: Recherche, Tests & Deploy
-
-### Jour 16-18: Recherche
-- [ ] Barre de recherche
-- [ ] Page /search avec query params
-- [ ] Filtres (catégorie, auteur, note)
-
-### Jour 19: Tests
+### Tests & CI/CD
 - [x] Vitest configuré
-- [ ] 5+ tests écrits
-- [x] Tests passent localement
-
-### Jour 20: CI/CD & Deploy
-- [ ] GitHub Actions workflow
-- [ ] Tests en CI
-- [x] Déploiement Vercel existant
+- [x] Tests de validation Zod
+- [x] GitHub Actions (lint + tests sur chaque push)
+- [x] Déploiement Vercel : https://demo-day-wine.vercel.app/
 
 ---
 
-## 📊 Checkpoint & Notes
+## ❌ Non implémenté
 
-**État technique actuel**:
-- [x] `npm test -- --run` passe: 1 fichier, 2 tests
-- [x] `npm run build` passe
-- [ ] `npm run lint` échoue: 4 erreurs `react/no-unescaped-entities` dans les pages auth
-
-**Blocages actuels**:
-- Corriger le lint des pages `/signin` et `/signup`
-- Démarrer le module de soumission de manuscrits
-
-**Notes personnelles**:
-- Mémoriser le WHY derrière chaque décision
-- Focus sur la compréhension, pas sur la finition
-- Le fichier de statut était en retard: les pages/actions auth existent déjà
+- [ ] Recherche & filtres (`/search?q=...`)
+- [ ] Page `error.tsx` + classes d'erreurs centralisées (`src/lib/errors.ts`)
 
 ---
 
-## 🎓 Compétences à maîtriser
+## 📊 État technique
 
-- [x] Créer un système d'auth avec Better Auth
-- [x] Utiliser Drizzle ORM et migrations
-- [x] Valider côté serveur avec Zod
-- [ ] Créer des routes dynamiques
-- [x] Écrire des tests automatisés
-- [ ] Configurer CI/CD avec GitHub Actions
-- [ ] Gérer les erreurs de manière centralisée
-
----
-
-**Mise à jour**: Compléter ce fichier au fur et à mesure. Chaque jour, mettre à jour avec ✅ et ⏳
+| Vérification | Statut |
+|---|---|
+| `npm test -- --run` | ✅ passe |
+| `npm run build` | ✅ passe |
+| Déploiement Vercel | ✅ live |
+| Emails Resend | ✅ opérationnels |

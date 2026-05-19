@@ -20,13 +20,13 @@ Une plateforme où :
 
 ## 🎯 7 Impératifs techniques à couvrir
 
-- [ ] 1. Routes dynamiques (URL params)
-- [ ] 2. Base de données + migrations
-- [ ] 3. Authentification + routes protégées
-- [ ] 4. Validation d'inputs côté serveur
-- [ ] 5. Suite de tests
-- [ ] 6. CI avec GitHub Actions
-- [ ] 7. Gestion d'erreurs centralisée
+- [x] 1. Routes dynamiques (URL params)
+- [x] 2. Base de données + migrations
+- [x] 3. Authentification + routes protégées
+- [x] 4. Validation d'inputs côté serveur
+- [x] 5. Suite de tests
+- [x] 6. CI avec GitHub Actions
+- [ ] 7. Gestion d'erreurs centralisée (`errors.ts` + `error.tsx` — non implémenté)
 
 ---
 
@@ -735,25 +735,27 @@ ratings
 ## 🧪 Checklist finale (fin semaine 4)
 
 **Core features** :
-- [ ] Auth complète (signup, signin, signout)
-- [ ] Soumission de manuscrits
-- [ ] Acceptance/rejet par admin
-- [ ] Publications visibles publiquement
-- [ ] Commentaires modérés
-- [ ] Système de notation
+- [x] Auth complète (signup, signin, signout)
+- [x] Soumission de manuscrits
+- [x] Acceptance/rejet par admin
+- [x] Publications visibles publiquement
+- [x] Commentaires modérés
+- [x] Système de notation
 - [ ] Recherche et filtres
-- [ ] Routes dynamiques
-- [ ] Validation Zod partout
+- [x] Routes dynamiques
+- [x] Validation Zod partout
 - [ ] Gestion d'erreurs centralisée
-- [ ] Tests + CI
-- [ ] Déploiement en prod
+- [x] Tests + CI
+- [x] Déploiement en prod
 
 **Bonus** (si tu as du temps) :
 - [ ] **Génération IA de catégorie & pitch** (à l'acceptation du manuscrit)
 - [ ] Édition/suppression de commentaires par auteur
-- [ ] Suppression de publication par admin
+- [x] Dépublication / toggle visibilité par admin
 - [ ] Profil utilisateur (voir les publications de quelqu'un)
-- [ ] Notifications (acceptation d'un manuscrit, réponse à un commentaire)
+- [x] Notifications in-app (acceptation / refus de manuscrit)
+- [x] Emails transactionnels via Resend
+- [x] Signalement de commentaires
 - [ ] Système de "favoris"
 
 ---
