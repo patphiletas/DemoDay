@@ -7,6 +7,10 @@ import { redirect } from "next/navigation";
 import { comments, manuscripts, notifications, publications, users } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import {
+  sendManuscriptAcceptedEmail,
+  sendManuscriptRejectedEmail,
+} from "@/lib/email";
 
 async function requireAdmin() {
   const session = await auth.api
@@ -46,6 +50,10 @@ export async function acceptManuscriptAction(formData: FormData) {
 
   if (!manuscript) return;
 
+  const author = await db.query.users.findFirst({
+    where: eq(users.id, manuscript.authorId),
+  });
+
   const baseSlug = slugify(manuscript.title);
   const slug = `${baseSlug}-${manuscriptId}`;
 
@@ -71,6 +79,16 @@ export async function acceptManuscriptAction(formData: FormData) {
     message: editorNote || "Votre manuscrit a été accepté et publié.",
   });
 
+  if (author) {
+    sendManuscriptAcceptedEmail(
+      author.email,
+      author.name,
+      manuscript.title,
+      editorNote,
+      slug
+    ).catch(() => null);
+  }
+
   revalidatePath("/admin");
   revalidatePath("/");
 }
@@ -87,6 +105,10 @@ export async function rejectManuscriptAction(formData: FormData) {
 
   if (!manuscript) return;
 
+  const author = await db.query.users.findFirst({
+    where: eq(users.id, manuscript.authorId),
+  });
+
   await db
     .update(manuscripts)
     .set({
@@ -102,6 +124,15 @@ export async function rejectManuscriptAction(formData: FormData) {
     relatedId: manuscriptId,
     message: reason || "Votre manuscrit n'a pas été retenu.",
   });
+
+  if (author) {
+    sendManuscriptRejectedEmail(
+      author.email,
+      author.name,
+      manuscript.title,
+      reason
+    ).catch(() => null);
+  }
 
   revalidatePath("/admin");
 }

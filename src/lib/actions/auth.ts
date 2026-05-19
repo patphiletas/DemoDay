@@ -1,5 +1,6 @@
 "use server";
 import { auth } from "@/lib/auth";
+import { sendWelcomeEmail } from "@/lib/email";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { signupSchema, signinSchema } from "@/lib/validation";
@@ -27,7 +28,6 @@ export async function signupAction(
   try {
     await auth.api.signUpEmail({
       body: {
-
         email: result.data.email,
         password: result.data.password,
         name: result.data.username,
@@ -36,6 +36,9 @@ export async function signupAction(
   } catch {
     return { error: "Une erreur est survenue, réessaie." };
   }
+
+  // Email envoyé en best-effort : une erreur ne bloque pas l'inscription
+  sendWelcomeEmail(result.data.email, result.data.username).catch(() => null);
 
   redirect("/");
 }
