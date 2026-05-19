@@ -25,6 +25,7 @@ export async function submitManuscriptAction(
   const result = manuscriptSchema.safeParse({
     category: formData.get("category"),
     content: formData.get("content"),
+    creditedAuthorName: formData.get("creditedAuthorName"),
     title: formData.get("title"),
   });
 
@@ -36,6 +37,7 @@ export async function submitManuscriptAction(
     authorId: session.user.id,
     category: result.data.category,
     content: result.data.content,
+    creditedAuthorName: result.data.creditedAuthorName,
     status: "submitted",
     title: result.data.title,
   });

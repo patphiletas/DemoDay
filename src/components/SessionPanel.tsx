@@ -14,28 +14,28 @@ type Props = {
 
 export function SessionPanel({ session }: Props) {
   return (
-    <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-5 space-y-2">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Session</h2>
+    <section className="editorial-panel space-y-3 rounded-lg p-5">
+      <h2 className="editorial-label">Session</h2>
       {session ? (
         <div className="space-y-1 text-sm">
-          <p className="text-green-600 font-medium">Connecté</p>
-          <p className="text-zinc-600 dark:text-zinc-400">Nom : {session.user.name}</p>
-          <p className="text-zinc-600 dark:text-zinc-400">Email : {session.user.email}</p>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="font-semibold text-[color:var(--sage)]">Connecté</p>
+          <p className="editorial-muted">Nom : {session.user.name}</p>
+          <p className="editorial-muted">Email : {session.user.email}</p>
+          <p className="editorial-muted">
             Email vérifié : {session.user.emailVerified ? "Oui" : "Non"}
           </p>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="editorial-muted">
             Créé le : {session.user.createdAt?.toLocaleDateString()}
           </p>
-          <p className="text-zinc-600 dark:text-zinc-400">ID : {session.user.id}</p>
+          <p className="editorial-muted">ID : {session.user.id}</p>
           <p>
-            <Link href="/dashboard" className="text-blue-500 hover:underline">
+            <Link href="/dashboard" className="font-semibold text-[color:var(--blueprint)] hover:text-[color:var(--accent-dark)]">
               Accéder au tableau de bord
             </Link>
           </p>
         </div>
       ) : (
-        <p className="text-sm text-zinc-400">Non connecté</p>
+        <p className="text-sm editorial-muted">Non connecté</p>
       )}
     </section>
   );

@@ -63,6 +63,7 @@ export async function acceptManuscriptAction(formData: FormData) {
     content: manuscript.content,
     category: manuscript.category ?? "Autre",
     pitch: pitch || manuscript.title,
+    creditedAuthorName: manuscript.creditedAuthorName,
     authorId: manuscript.authorId,
     isVisible: true,
   });

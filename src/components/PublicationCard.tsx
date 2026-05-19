@@ -1,9 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  commentPublicationAction,
-  ratePublicationAction,
-} from "@/lib/actions/publication-interactions";
 
 type Publication = {
   id: number;
@@ -13,7 +9,7 @@ type Publication = {
   pitch: string;
   coverImageUrl: string | null;
   publishedAt: Date;
-  authorName: string;
+  creditedAuthorName: string;
 };
 
 type Comment = {
@@ -29,69 +25,67 @@ type RatingStat = {
 
 type Props = {
   publication: Publication;
-  userScore: number | undefined;
-  ratingStat: RatingStat | undefined;
+  userScore?: number | undefined;
+  ratingStat?: RatingStat | undefined;
   comments: Comment[];
-  isLoggedIn: boolean;
+  isLoggedIn?: boolean;
+  isNew?: boolean;
 };
-
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function PublicationCard({
   publication,
-  userScore,
   ratingStat,
   comments,
-  isLoggedIn,
+  isNew = false,
 }: Props) {
-  const isNew = Date.now() - new Date(publication.publishedAt).getTime() < ONE_WEEK_MS;
-
   return (
-    <article className="min-w-[260px] snap-start overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-950 sm:min-w-[320px]">
-      <Link href={`/publications/${publication.slug}`} className="block aspect-3/4 bg-zinc-100 dark:bg-zinc-900">
+    <article className="publication-card editorial-surface snap-start overflow-hidden rounded-lg">
+      <Link href={`/publications/${publication.slug}`} className="publication-card-cover block bg-[color:var(--paper-muted)]">
         {publication.coverImageUrl ? (
           <Image
             src={publication.coverImageUrl}
             alt={`Couverture de ${publication.title}`}
             width={900}
             height={1200}
-            className="h-full w-full object-contain transition-opacity hover:opacity-90"
+            className="h-full w-full object-contain p-2 transition-opacity hover:opacity-90"
             unoptimized
           />
         ) : (
-          <div className="flex h-full w-full flex-col justify-end bg-linear-to-br from-zinc-600 to-zinc-900 p-5 transition-opacity hover:opacity-90">
-            <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">
+          <div className="flex h-full w-full flex-col justify-between bg-[color:var(--ink)] p-5 transition-opacity hover:opacity-95">
+            <p className="editorial-label text-[color:var(--paper)] opacity-70">
               {publication.category}
             </p>
-            <p className="mt-2 text-lg font-semibold leading-snug text-white">
-              {publication.title}
-            </p>
-            <p className="mt-1 text-xs text-zinc-300">{publication.authorName}</p>
+            <div>
+              <p className="text-2xl font-bold leading-tight text-[color:var(--paper)] opacity-90 [font-stretch:condensed]">
+                {publication.title}
+              </p>
+              <p className="mt-3 text-sm text-[color:var(--paper)] opacity-70">{publication.creditedAuthorName}</p>
+            </div>
           </div>
         )}
       </Link>
 
-      <div className="space-y-3 p-4">
+      <div className="publication-card-body space-y-3 p-4">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+            <p className="editorial-label">
               {publication.category}
             </p>
             {isNew && (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+              <span className="new-chip rounded-full px-2 py-0.5 text-xs font-bold">
                 Nouveauté
               </span>
             )}
           </div>
           <Link href={`/publications/${publication.slug}`}>
-            <h3 className="mt-1 text-lg font-semibold text-zinc-900 hover:underline underline-offset-2 dark:text-zinc-50">
+            <h3 className="mt-2 text-xl font-bold leading-tight text-[color:var(--ink-soft)] [font-stretch:condensed] hover:text-[color:var(--accent-dark)]">
               {publication.title}
             </h3>
           </Link>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            par {publication.authorName}
+          <p className="mt-1 text-sm editorial-muted">
+            Œuvre de {publication.creditedAuthorName}
           </p>
-          <p className="mt-0.5 text-xs text-zinc-400">
+          <p className="mt-0.5 text-xs editorial-muted">
             {new Date(publication.publishedAt).toLocaleDateString("fr-FR", {
               day: "2-digit",
               month: "long",
@@ -100,15 +94,15 @@ export function PublicationCard({
           </p>
         </div>
 
-        <p className="line-clamp-3 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="publication-card-pitch line-clamp-3 text-sm leading-6 editorial-muted">
           {publication.pitch}
         </p>
 
-        <div className="rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+        <div className="rounded-md bg-[color:var(--paper-muted)] px-3 py-2 text-sm editorial-muted">
           {ratingStat ? (
             <span>
               Moyenne :{" "}
-              <strong className="text-zinc-900 dark:text-zinc-50">
+              <strong className="text-[color:var(--ink)]">
                 {ratingStat.average}/5
               </strong>{" "}
               ({ratingStat.count} avis)
@@ -118,68 +112,8 @@ export function PublicationCard({
           )}
         </div>
 
-        {/* {isLoggedIn ? (
-          <div className="space-y-4 border-t border-zinc-100 pt-4 dark:border-zinc-700">
-            <form action={ratePublicationAction} className="space-y-2">
-              <input type="hidden" name="publicationId" value={publication.id} />
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
-                Votre note
-              </p>
-              <div className="grid grid-cols-5 gap-1">
-                {[1, 2, 3, 4, 5].map((score) => (
-                  <button
-                    key={score}
-                    type="submit"
-                    name="score"
-                    value={score}
-                    className={`rounded-md border px-2 py-1 text-sm font-medium transition-colors ${
-                      userScore === score
-                        ? "border-amber-300 bg-amber-100 text-amber-800"
-                        : "border-zinc-200 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
-                    }`}
-                  >
-                    {score}
-                  </button>
-                ))}
-              </div>
-            </form>
-
-            <form action={commentPublicationAction} className="space-y-2">
-              <input type="hidden" name="publicationId" value={publication.id} />
-              <label
-                htmlFor={`comment-${publication.id}`}
-                className="text-xs font-medium uppercase tracking-wide text-zinc-400"
-              >
-                Commenter
-              </label>
-              <textarea
-                id={`comment-${publication.id}`}
-                name="content"
-                rows={3}
-                maxLength={500}
-                required
-                placeholder="Votre commentaire"
-                className="w-full resize-none rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
-              />
-              <button
-                type="submit"
-                className="rounded-md bg-zinc-950 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
-              >
-                Publier
-              </button>
-            </form>
-          </div>
-        ) : (
-          <Link
-            href="/signin"
-            className="inline-flex text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-50"
-          >
-            Connectez-vous pour noter et commenter
-          </Link>
-        )} */}
-
-        <div className="space-y-2 border-t border-zinc-100 pt-4 dark:border-zinc-700">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+        <div className="publication-card-comments space-y-2 border-t pt-4 rule">
+          <p className="editorial-label">
             Derniers commentaires
           </p>
           {comments.length > 0 ? (
@@ -187,19 +121,19 @@ export function PublicationCard({
               {comments.map((comment) => (
                 <div
                   key={comment.id}
-                  className="rounded-md bg-zinc-50 p-3 text-sm dark:bg-zinc-900"
+                  className="rounded-md bg-[color:var(--paper-muted)] p-3 text-sm"
                 >
-                  <p className="font-medium text-zinc-900 dark:text-zinc-50">
+                  <p className="font-semibold text-[color:var(--ink)]">
                     {comment.authorName}
                   </p>
-                  <p className="mt-1 line-clamp-3 text-zinc-600 dark:text-zinc-400">
+                  <p className="mt-1 line-clamp-3 editorial-muted">
                     {comment.content}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-zinc-400">Aucun commentaire pour le moment.</p>
+            <p className="text-sm editorial-muted">Aucun commentaire pour le moment.</p>
           )}
         </div>
       </div>

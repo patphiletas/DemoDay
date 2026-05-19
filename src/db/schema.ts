@@ -64,6 +64,7 @@ export const manuscripts = pgTable("manuscripts", {
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   category: varchar("category", { length: 100 }),
+  creditedAuthorName: varchar("credited_author_name", { length: 255 }).notNull(),
   authorId: text("author_id")
     .notNull()
     .references(() => users.id),
@@ -83,6 +84,7 @@ export const publications = pgTable("publications", {
   category: varchar("category", { length: 100 }).notNull(),
   pitch: text("pitch").notNull(),
   coverImageUrl: text("cover_image_url"),
+  creditedAuthorName: varchar("credited_author_name", { length: 255 }).notNull(),
   authorId: text("author_id")
     .notNull()
     .references(() => users.id),

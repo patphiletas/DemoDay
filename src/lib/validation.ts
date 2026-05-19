@@ -26,6 +26,11 @@ export const manuscriptSchema = z.object({
     .string()
     .min(5, "Le titre doit contenir au moins 5 caractères")
     .max(255, "Le titre ne peut pas dépasser 255 caractères"),
+  creditedAuthorName: z
+    .string()
+    .trim()
+    .min(2, "Le nom de l'auteur ou autrice doit contenir au moins 2 caractères")
+    .max(255, "Le nom de l'auteur ou autrice ne peut pas dépasser 255 caractères"),
   content: z
     .string()
     .min(100, "Le contenu doit contenir au moins 100 caractères"),

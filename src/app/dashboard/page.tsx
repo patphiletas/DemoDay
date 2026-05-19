@@ -52,7 +52,7 @@ export default async function DashboardPage() {
           pitch: publications.pitch,
           slug: publications.slug,
           score: ratings.score,
-          authorName: publicationAuthors.name,
+          creditedAuthorName: publications.creditedAuthorName,
         })
         .from(ratings)
         .innerJoin(publications, eq(ratings.publicationId, publications.id))
@@ -65,6 +65,7 @@ export default async function DashboardPage() {
           id: manuscripts.id,
           title: manuscripts.title,
           category: manuscripts.category,
+          creditedAuthorName: manuscripts.creditedAuthorName,
           status: manuscripts.status,
           submittedAt: manuscripts.submittedAt,
         })
@@ -77,6 +78,7 @@ export default async function DashboardPage() {
           id: manuscripts.id,
           title: manuscripts.title,
           category: manuscripts.category,
+          creditedAuthorName: manuscripts.creditedAuthorName,
           reviewedAt: manuscripts.reviewedAt,
         })
         .from(manuscripts)
@@ -88,22 +90,22 @@ export default async function DashboardPage() {
         )
         .orderBy(desc(manuscripts.reviewedAt), desc(manuscripts.submittedAt))
         .limit(5),
-    ]);
+  ]);
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-6 py-10 text-zinc-950">
-      <div className="mx-auto w-full max-w-6xl space-y-8">
-        <header className="flex flex-col gap-5 border-b border-zinc-200 pb-8 md:flex-row md:items-end md:justify-between">
+    <main className="page-shell">
+      <div className="container-editorial space-y-8">
+        <header className="flex flex-col gap-5 border-b pb-8 rule md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-medium text-zinc-500">
+            <p className="text-sm font-semibold editorial-muted">
               Bonjour {session.user.name}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold">Tableau de bord</h1>
+            <h1 className="font-serif-display mt-2 text-5xl font-bold text-[color:var(--ink)]">Tableau de bord</h1>
           </div>
 
           <Link
             href="/manuscripts/submit"
-            className="inline-flex w-fit items-center justify-center rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+            className="btn-primary w-fit"
           >
             Soumettre un manuscrit
           </Link>
@@ -128,23 +130,23 @@ export default async function DashboardPage() {
                 {favoriteBooks.map((book) => (
                   <article
                     key={book.id}
-                    className="rounded-lg border border-zinc-200 bg-white p-4"
+                    className="editorial-surface rounded-lg p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h2 className="font-medium">{book.title}</h2>
-                        <p className="mt-1 text-xs text-zinc-500">
+                        <h2 className="font-serif-display text-lg font-bold text-[color:var(--ink)]">{book.title}</h2>
+                        <p className="mt-1 text-xs editorial-muted">
                           {book.category}
                         </p>
-                        <p className="mt-1 text-xs text-zinc-500">
-                          par {book.authorName}
+                        <p className="mt-1 text-xs editorial-muted">
+                          Œuvre de {book.creditedAuthorName}
                         </p>
                       </div>
-                      <span className="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
+                      <span className="accent-chip rounded-full px-2 py-1 text-xs font-bold">
                         {book.score}/5
                       </span>
                     </div>
-                    <p className="mt-3 line-clamp-2 text-sm text-zinc-600">
+                    <p className="mt-3 line-clamp-2 text-sm leading-6 editorial-muted">
                       {book.pitch}
                     </p>
                   </article>
@@ -161,20 +163,23 @@ export default async function DashboardPage() {
                 {submittedManuscripts.map((manuscript) => (
                   <article
                     key={manuscript.id}
-                    className="rounded-lg border border-zinc-200 bg-white p-4"
+                    className="editorial-surface rounded-lg p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h2 className="font-medium">{manuscript.title}</h2>
-                        <p className="mt-1 text-xs text-zinc-500">
+                        <h2 className="font-serif-display text-lg font-bold text-[color:var(--ink)]">{manuscript.title}</h2>
+                        <p className="mt-1 text-xs editorial-muted">
+                          Œuvre de {manuscript.creditedAuthorName}
+                        </p>
+                        <p className="mt-1 text-xs editorial-muted">
                           {manuscript.category ?? "Sans catégorie"}
                         </p>
                       </div>
-                      <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700">
+                      <span className="muted-chip rounded-full px-2 py-1 text-xs font-bold">
                         {statusLabel(manuscript.status)}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm text-zinc-500">
+                    <p className="mt-3 text-sm editorial-muted">
                       Soumis le {formatDate(manuscript.submittedAt)}
                     </p>
                   </article>
@@ -191,13 +196,16 @@ export default async function DashboardPage() {
                 {acceptedManuscripts.map((manuscript) => (
                   <article
                     key={manuscript.id}
-                    className="rounded-lg border border-emerald-200 bg-white p-4"
+                    className="editorial-surface rounded-lg p-4"
                   >
-                    <h2 className="font-medium">{manuscript.title}</h2>
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <h2 className="font-serif-display text-lg font-bold text-[color:var(--ink)]">{manuscript.title}</h2>
+                    <p className="mt-1 text-xs editorial-muted">
+                      Œuvre de {manuscript.creditedAuthorName}
+                    </p>
+                    <p className="mt-1 text-xs editorial-muted">
                       {manuscript.category ?? "Sans catégorie"}
                     </p>
-                    <p className="mt-3 text-sm text-emerald-700">
+                    <p className="mt-3 text-sm font-semibold text-[color:var(--sage)]">
                       Accepté le {formatDate(manuscript.reviewedAt)}
                     </p>
                   </article>
@@ -215,9 +223,9 @@ export default async function DashboardPage() {
 
 function DashboardMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-5">
-      <p className="text-sm text-zinc-500">{label}</p>
-      <p className="mt-2 text-3xl font-semibold">{value}</p>
+    <div className="editorial-surface rounded-lg p-5">
+      <p className="text-sm font-semibold editorial-muted">{label}</p>
+      <p className="font-serif-display mt-2 text-4xl font-bold text-[color:var(--ink)]">{value}</p>
     </div>
   );
 }
@@ -230,8 +238,8 @@ function DashboardPanel({
   title: string;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-zinc-100/60 p-4">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+    <div className="editorial-panel rounded-lg p-4">
+      <h2 className="editorial-label mb-4">
         {title}
       </h2>
       {children}
@@ -241,7 +249,7 @@ function DashboardPanel({
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-500">
+    <div className="rounded-lg border border-dashed p-5 text-sm editorial-surface editorial-muted">
       {text}
     </div>
   );

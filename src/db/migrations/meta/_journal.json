@@ -8,6 +8,13 @@
       "when": 1779096109486,
       "tag": "0000_crazy_khan",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779197054961,
+      "tag": "0001_concerned_juggernaut",
+      "breakpoints": true
     }
   ]
 }

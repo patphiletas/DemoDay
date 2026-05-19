@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { HorizontalScroll } from "@/components/HorizontalScroll";
 import { PublicationCard } from "@/components/PublicationCard";
 import { SessionPanel } from "@/components/SessionPanel";
-import { and, avg, count, desc, eq, inArray } from "drizzle-orm";
+import { and, avg, count, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -22,7 +22,8 @@ export default async function Home() {
       pitch: publications.pitch,
       coverImageUrl: publications.coverImageUrl,
       publishedAt: publications.publishedAt,
-      authorName: publicationAuthors.name,
+      creditedAuthorName: publications.creditedAuthorName,
+      isNew: sql<boolean>`${gt(publications.publishedAt, sql`now() - interval '7 days'`)}`,
     })
     .from(publications)
     .innerJoin(publicationAuthors, eq(publications.authorId, publicationAuthors.id))
@@ -73,7 +74,6 @@ export default async function Home() {
       { average: r.average === null ? null : Number(r.average).toFixed(1), count: r.count },
     ])
   );
-
   const commentsByPublicationId = new Map<number, typeof latestComments>();
   for (const comment of latestComments) {
     const existing = commentsByPublicationId.get(comment.publicationId) ?? [];
@@ -83,29 +83,37 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-zinc-50 px-6 py-16 dark:bg-black">
-      <main className="w-full max-w-5xl space-y-14">
-        <div className="space-y-6 border-b border-zinc-200 pb-10 dark:border-zinc-700">
-          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-            Édition indépendante
-          </p>
-          <h1 className="text-5xl font-bold leading-none tracking-tight text-zinc-400 dark:text-zinc-50 sm:text-6xl">
-            AlterNative
-          </h1>
-          <p className="max-w-lg text-lg text-zinc-500 dark:text-zinc-400">
-            lisez différemment.
-          </p>
+    <div className="page-shell">
+      <main className="container-editorial space-y-14">
+        <div className="grid gap-8 border-b pb-10 rule lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+          <div className="space-y-6">
+            <p className="editorial-label">Édition indépendante</p>
+            <h1 className="font-serif-display text-5xl font-bold leading-none text-[color:var(--ink)] sm:text-6xl md:text-7xl">
+              AlterNative
+            </h1>
+            <p className="max-w-2xl text-xl leading-8 editorial-muted">
+              Une revue pour découvrir, lire et faire circuler des textes hors des circuits trop sages.
+            </p>
+          </div>
+          <div className="editorial-panel rounded-lg p-5">
+            <p className="font-serif-display text-2xl leading-tight text-[color:var(--ink)]">
+              Lire autrement, publier avec soin.
+            </p>
+            <p className="mt-3 text-sm leading-6 editorial-muted">
+              Manuscrits, commentaires, notes et comité éditorial vivent au même endroit.
+            </p>
+          </div>
           {!session && (
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3 lg:col-span-2">
               <a
                 href="/signup"
-                className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="btn-primary"
               >
                 Rejoindre la revue
               </a>
               <a
                 href="/signin"
-                className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                className="btn-secondary"
               >
                 Se connecter
               </a>
@@ -114,30 +122,40 @@ export default async function Home() {
         </div>
 
         <section className="space-y-6">
+          <input id="compact-publications" type="checkbox" className="compact-toggle peer sr-only" />
           <div className="flex items-baseline justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Dernières publications</h2>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <h2 className="font-serif-display text-3xl font-bold text-[color:var(--ink)]">Dernières publications</h2>
+              <p className="mt-1 text-sm editorial-muted">
                 Les textes récemment publiés par la communauté.
               </p>
             </div>
+            <label
+              htmlFor="compact-publications"
+              className="btn-secondary min-h-0 cursor-pointer px-3 py-2 peer-checked:bg-[color:var(--ink)] peer-checked:text-[color:var(--paper)]"
+            >
+              Mode compact
+            </label>
           </div>
 
           {featuredPublications.length > 0 ? (
-            <HorizontalScroll>
-              {featuredPublications.map((publication) => (
-                <PublicationCard
-                  key={publication.id}
-                  publication={publication}
-                  userScore={ratingByPublicationId.get(publication.id)}
+            <div className="publication-feed">
+              <HorizontalScroll>
+                {featuredPublications.map((publication) => (
+                  <PublicationCard
+                    key={publication.id}
+                    publication={publication}
+                    userScore={ratingByPublicationId.get(publication.id)}
                   ratingStat={ratingStatsByPublicationId.get(publication.id)}
                   comments={commentsByPublicationId.get(publication.id) ?? []}
                   isLoggedIn={!!session}
+                  isNew={publication.isNew}
                 />
               ))}
-            </HorizontalScroll>
+              </HorizontalScroll>
+            </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950">
+            <div className="rounded-lg border border-dashed p-5 text-sm editorial-surface editorial-muted">
               Aucune publication disponible pour le moment.
             </div>
           )}

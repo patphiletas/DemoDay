@@ -14,9 +14,9 @@ export function HorizontalScroll({ children }: { children: React.ReactNode }) {
       <button
         onClick={() => scroll("left")}
         aria-label="Précédent"
-        className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+        className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-sm hover:border-[color:var(--accent)]"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-zinc-600 dark:text-zinc-300">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[color:var(--ink-soft)]">
           <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
@@ -31,9 +31,9 @@ export function HorizontalScroll({ children }: { children: React.ReactNode }) {
       <button
         onClick={() => scroll("right")}
         aria-label="Suivant"
-        className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+        className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-sm hover:border-[color:var(--accent)]"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-zinc-600 dark:text-zinc-300">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[color:var(--ink-soft)]">
           <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>

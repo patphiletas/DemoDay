@@ -10,29 +10,29 @@ export default async function Navbar() {
     .catch(() => null);
 
   return (
-    <nav className="w-full border-b border-zinc-200 bg-white px-6 py-3 dark:border-zinc-700 dark:bg-zinc-950">
-      <div className="mx-auto flex max-w-5xl items-center justify-between">
-        <Link href="/" className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+    <nav className="sticky top-0 z-20 w-full border-b bg-[color:var(--paper)] px-6 py-3 backdrop-blur-md rule">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+        <Link href="/" className="font-serif-display text-xl font-bold text-[color:var(--ink)]">
           AlterNative
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-3">
           <ThemeToggle />
           {session ? (
             <>
               <Link
                 href="/dashboard"
-                className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                className="text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--accent-dark)]"
               >
                 Mon espace
               </Link>
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="hidden text-sm font-semibold text-[color:var(--ink)] sm:inline">
                 {session.user.name}
               </span>
               <form action={signoutAction}>
                 <button
                   type="submit"
-                  className="text-sm text-zinc-400 transition-colors hover:text-red-500 dark:hover:text-red-400"
+                  className="text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--accent)]"
                 >
                   Déconnexion
                 </button>
@@ -42,13 +42,13 @@ export default async function Navbar() {
             <>
               <Link
                 href="/signin"
-                className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                className="text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--accent-dark)]"
               >
                 Connexion
               </Link>
               <Link
                 href="/signup"
-                className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="btn-primary min-h-0 px-3 py-1.5"
               >
                 S&apos;inscrire
               </Link>

@@ -119,6 +119,7 @@ describe("manuscriptSchema", () => {
     expect(
       manuscriptSchema.safeParse({
         title: "Mon titre valide",
+        creditedAuthorName: "Anya Schiffrin",
         content: validContent,
         category: "fiction",
       }).success
@@ -129,6 +130,7 @@ describe("manuscriptSchema", () => {
     expect(
       manuscriptSchema.safeParse({
         title: "abc",
+        creditedAuthorName: "Anya Schiffrin",
         content: validContent,
         category: "fiction",
       }).success
@@ -139,6 +141,7 @@ describe("manuscriptSchema", () => {
     expect(
       manuscriptSchema.safeParse({
         title: "a".repeat(256),
+        creditedAuthorName: "Anya Schiffrin",
         content: validContent,
         category: "fiction",
       }).success
@@ -149,6 +152,7 @@ describe("manuscriptSchema", () => {
     expect(
       manuscriptSchema.safeParse({
         title: "Mon titre valide",
+        creditedAuthorName: "Anya Schiffrin",
         content: "trop court",
         category: "fiction",
       }).success
@@ -159,8 +163,19 @@ describe("manuscriptSchema", () => {
     expect(
       manuscriptSchema.safeParse({
         title: "Mon titre valide",
+        creditedAuthorName: "Anya Schiffrin",
         content: validContent,
         category: "",
+      }).success
+    ).toBe(false);
+  });
+
+  it("rejects a missing credited author name", () => {
+    expect(
+      manuscriptSchema.safeParse({
+        title: "Mon titre valide",
+        content: validContent,
+        category: "fiction",
       }).success
     ).toBe(false);
   });

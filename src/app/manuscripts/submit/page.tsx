@@ -14,25 +14,25 @@ export default async function SubmitManuscriptPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-6 py-10 text-zinc-950">
+    <main className="page-shell">
       <div className="mx-auto w-full max-w-4xl space-y-8">
-        <header className="border-b border-zinc-200 pb-6">
+        <header className="border-b pb-6 rule">
           <Link
             href="/dashboard"
-            className="text-sm font-medium text-zinc-500 underline-offset-4 hover:text-zinc-950 hover:underline"
+            className="text-sm font-semibold editorial-muted hover:text-[color:var(--accent-dark)]"
           >
             Retour au tableau de bord
           </Link>
-          <h1 className="mt-4 text-3xl font-semibold">
+          <h1 className="font-serif-display mt-4 text-5xl font-bold text-[color:var(--ink)]">
             Soumettre un manuscrit
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+          <p className="mt-3 max-w-2xl text-sm leading-6 editorial-muted">
             Votre texte sera enregistré avec le statut soumis. Il pourra ensuite
             être relu, accepté ou refusé par l&apos;équipe éditoriale.
           </p>
         </header>
 
-        <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <section className="editorial-surface rounded-lg p-5">
           <ManuscriptSubmissionForm />
         </section>
       </div>

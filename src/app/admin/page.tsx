@@ -37,10 +37,11 @@ export default async function AdminPage() {
         id: manuscripts.id,
         title: manuscripts.title,
         category: manuscripts.category,
+        creditedAuthorName: manuscripts.creditedAuthorName,
         content: manuscripts.content,
         status: manuscripts.status,
         submittedAt: manuscripts.submittedAt,
-        authorName: manuscriptAuthors.name,
+        submitterName: manuscriptAuthors.name,
         authorEmail: manuscriptAuthors.email,
         authorId: manuscripts.authorId,
       })
@@ -54,10 +55,11 @@ export default async function AdminPage() {
         id: publications.id,
         title: publications.title,
         category: publications.category,
+        creditedAuthorName: publications.creditedAuthorName,
         slug: publications.slug,
         isVisible: publications.isVisible,
         publishedAt: publications.publishedAt,
-        authorName: publicationAuthors.name,
+        submitterName: publicationAuthors.name,
       })
       .from(publications)
       .innerJoin(publicationAuthors, eq(publications.authorId, publicationAuthors.id))
@@ -81,13 +83,13 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black px-6 py-10">
-      <div className="mx-auto max-w-5xl space-y-12">
+    <div className="page-shell">
+      <div className="container-editorial max-w-5xl space-y-12">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+          <h1 className="font-serif-display text-5xl font-bold text-[color:var(--ink)]">
             Administration
           </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-2 text-sm editorial-muted">
             Bienvenue, {session.user.name}
           </p>
         </div>
@@ -95,41 +97,41 @@ export default async function AdminPage() {
         {/* Manuscrits en attente */}
         <section className="space-y-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <h2 className="font-serif-display text-2xl font-bold text-[color:var(--ink)]">
               Manuscrits en attente
             </h2>
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+            <span className="accent-chip rounded-full px-2 py-0.5 text-xs font-bold">
               {pendingManuscripts.length}
             </span>
           </div>
 
           {pendingManuscripts.length === 0 ? (
-            <p className="text-sm text-zinc-400">Aucun manuscrit en attente.</p>
+            <p className="text-sm editorial-muted">Aucun manuscrit en attente.</p>
           ) : (
             <div className="space-y-4">
               {pendingManuscripts.map((m) => (
                 <div
                   key={m.id}
-                  className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950"
+                  className="editorial-surface rounded-lg p-5"
                 >
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      <p className="font-serif-display text-xl font-bold text-[color:var(--ink)]">
                         {m.title}
                       </p>
-                      <p className="text-xs text-zinc-400">
-                        {m.authorName} · {m.authorEmail} · {m.category ?? "Sans catégorie"} ·{" "}
+                      <p className="text-xs editorial-muted">
+                        Œuvre de {m.creditedAuthorName} · Déposé par {m.submitterName} · {m.authorEmail} · {m.category ?? "Sans catégorie"} ·{" "}
                         {new Date(m.submittedAt).toLocaleDateString("fr-FR")}
                       </p>
                     </div>
                   </div>
 
                   <details className="mb-4 group">
-                    <summary className="cursor-pointer text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 select-none">
+                    <summary className="cursor-pointer select-none text-xs font-semibold editorial-muted hover:text-[color:var(--accent-dark)]">
                       Lire le texte
                     </summary>
-                    <div className="mt-2 max-h-96 overflow-y-auto rounded-md bg-zinc-50 px-4 py-3 dark:bg-zinc-900">
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                    <div className="mt-2 max-h-96 overflow-y-auto rounded-md bg-[color:var(--paper-muted)] px-4 py-3">
+                      <p className="whitespace-pre-wrap font-serif-display text-base leading-7 text-[color:var(--ink)]">
                         {m.content}
                       </p>
                     </div>
@@ -144,17 +146,17 @@ export default async function AdminPage() {
                         name="pitch"
                         placeholder="Pitch (accroche pour la page d'accueil)"
                         required
-                        className="w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                        className="field px-3 py-2 text-sm"
                       />
                       <textarea
                         name="editorNote"
                         rows={2}
                         placeholder="Message pour l'auteur (optionnel)"
-                        className="w-full resize-none rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                        className="field resize-none px-3 py-2 text-sm"
                       />
                       <button
                         type="submit"
-                        className="w-full rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+                        className="w-full rounded-md bg-[color:var(--sage)] px-3 py-2 text-sm font-bold text-white hover:bg-[color:var(--blueprint)]"
                       >
                         Accepter et publier
                       </button>
@@ -168,11 +170,11 @@ export default async function AdminPage() {
                         rows={4}
                         placeholder="Motif du refus (envoyé à l'auteur)"
                         required
-                        className="w-full resize-none rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                        className="field resize-none px-3 py-2 text-sm"
                       />
                       <button
                         type="submit"
-                        className="w-full rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-400"
+                        className="w-full rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-100"
                       >
                         Refuser
                       </button>
@@ -186,39 +188,41 @@ export default async function AdminPage() {
 
         {/* Publications */}
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="font-serif-display text-2xl font-bold text-[color:var(--ink)]">
             Publications ({allPublications.length})
           </h2>
 
           {allPublications.length === 0 ? (
-            <p className="text-sm text-zinc-400">Aucune publication.</p>
+            <p className="text-sm editorial-muted">Aucune publication.</p>
           ) : (
-            <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700">
+            <div className="editorial-surface overflow-hidden rounded-lg">
               <table className="w-full text-sm">
-                <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+                <thead className="border-b bg-[color:var(--paper-muted)] rule">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-zinc-500">Titre</th>
-                    <th className="px-4 py-3 text-left font-medium text-zinc-500">Auteur</th>
-                    <th className="px-4 py-3 text-left font-medium text-zinc-500">Catégorie</th>
-                    <th className="px-4 py-3 text-left font-medium text-zinc-500">Statut</th>
-                    <th className="px-4 py-3 text-left font-medium text-zinc-500">Actions</th>
+                    <th className="px-4 py-3 text-left font-semibold editorial-muted">Titre</th>
+                    <th className="px-4 py-3 text-left font-semibold editorial-muted">Auteur/autrice</th>
+                    <th className="px-4 py-3 text-left font-semibold editorial-muted">Déposant</th>
+                    <th className="px-4 py-3 text-left font-semibold editorial-muted">Catégorie</th>
+                    <th className="px-4 py-3 text-left font-semibold editorial-muted">Statut</th>
+                    <th className="px-4 py-3 text-left font-semibold editorial-muted">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100 bg-white dark:divide-zinc-800 dark:bg-zinc-950">
+                <tbody className="divide-y divide-[color:var(--line)] bg-[color:var(--paper)]">
                   {allPublications.map((pub) => (
                     <tr key={pub.id}>
-                      <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-50">
+                      <td className="px-4 py-3 font-semibold text-[color:var(--ink)]">
                         {pub.title}
                       </td>
-                      <td className="px-4 py-3 text-zinc-500">{pub.authorName}</td>
-                      <td className="px-4 py-3 text-zinc-500">{pub.category}</td>
+                      <td className="px-4 py-3 editorial-muted">{pub.creditedAuthorName}</td>
+                      <td className="px-4 py-3 editorial-muted">{pub.submitterName}</td>
+                      <td className="px-4 py-3 editorial-muted">{pub.category}</td>
                       <td className="px-4 py-3">
                         {pub.isVisible ? (
-                          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                          <span className="sage-chip rounded-full px-2 py-0.5 text-xs font-bold">
                             Visible
                           </span>
                         ) : (
-                          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+                          <span className="muted-chip rounded-full px-2 py-0.5 text-xs font-bold">
                             Masquée
                           </span>
                         )}
@@ -230,7 +234,7 @@ export default async function AdminPage() {
                             <input type="hidden" name="isVisible" value={String(pub.isVisible)} />
                             <button
                               type="submit"
-                              className="rounded border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400"
+                              className="rounded border border-[color:var(--line)] px-2 py-1 text-xs font-semibold editorial-muted hover:border-[color:var(--accent)]"
                             >
                               {pub.isVisible ? "Masquer" : "Afficher"}
                             </button>
@@ -239,7 +243,7 @@ export default async function AdminPage() {
                             <input type="hidden" name="publicationId" value={pub.id} />
                             <button
                               type="submit"
-                              className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400"
+                              className="accent-chip rounded border border-[color:var(--accent)] px-2 py-1 text-xs font-semibold"
                             >
                               Remettre en manuscrit
                             </button>
@@ -256,12 +260,12 @@ export default async function AdminPage() {
 
         {/* Commentaires */}
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="font-serif-display text-2xl font-bold text-[color:var(--ink)]">
             Commentaires ({allComments.length})
           </h2>
 
           {allComments.length === 0 ? (
-            <p className="text-sm text-zinc-400">Aucun commentaire.</p>
+            <p className="text-sm editorial-muted">Aucun commentaire.</p>
           ) : (
             <div className="space-y-3">
               {allComments.map((c) => (
@@ -269,21 +273,21 @@ export default async function AdminPage() {
                   key={c.id}
                   className={`flex items-start gap-4 rounded-xl border p-4 ${
                     c.isDeleted
-                      ? "border-zinc-100 bg-zinc-50 opacity-50 dark:border-zinc-700 dark:bg-zinc-900"
-                      : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+                      ? "border-[color:var(--line)] bg-[color:var(--paper-muted)] opacity-55"
+                      : "editorial-surface"
                   }`}
                 >
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                      <span className="text-sm font-semibold text-[color:var(--ink)]">
                         {c.authorName}
                       </span>
-                      <span className="text-xs text-zinc-400">{c.authorEmail}</span>
-                      <span className="text-xs text-zinc-400">·</span>
-                      <span className="text-xs text-zinc-400 italic">{c.publicationTitle}</span>
+                      <span className="text-xs editorial-muted">{c.authorEmail}</span>
+                      <span className="text-xs editorial-muted">·</span>
+                      <span className="text-xs italic editorial-muted">{c.publicationTitle}</span>
                     </div>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">{c.content}</p>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-sm leading-6 editorial-muted">{c.content}</p>
+                    <p className="text-xs editorial-muted">
                       {new Date(c.createdAt).toLocaleDateString("fr-FR", {
                         day: "2-digit",
                         month: "short",
@@ -302,7 +306,7 @@ export default async function AdminPage() {
                         <input type="hidden" name="commentId" value={c.id} />
                         <button
                           type="submit"
-                          className="rounded border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400"
+                          className="rounded border border-[color:var(--line)] px-2 py-1 text-xs font-semibold editorial-muted hover:border-[color:var(--accent)]"
                         >
                           Restaurer
                         </button>
@@ -312,7 +316,7 @@ export default async function AdminPage() {
                         <input type="hidden" name="commentId" value={c.id} />
                         <button
                           type="submit"
-                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-600 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-400"
+                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
                         >
                           Supprimer
                         </button>

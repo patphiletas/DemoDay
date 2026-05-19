@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 function SunIcon() {
   return (
@@ -27,29 +27,36 @@ function MoonIcon() {
 }
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const isDark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    setDark(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-  }, []);
+  const dark = useSyncExternalStore(subscribeTheme, getThemeSnapshot, () => false);
 
   function toggle() {
-    const next = !dark;
-    setDark(next);
+    const next = !document.documentElement.classList.contains("dark");
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
+    window.dispatchEvent(new Event("themechange"));
   }
 
   return (
     <button
       onClick={toggle}
-      className="text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+      className="p-1 text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--accent-dark)]"
       aria-label="Basculer le mode sombre"
     >
       {dark ? <SunIcon /> : <MoonIcon />}
     </button>
   );
+}
+
+function subscribeTheme(onStoreChange: () => void) {
+  window.addEventListener("themechange", onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+
+  return () => {
+    window.removeEventListener("themechange", onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function getThemeSnapshot() {
+  return document.documentElement.classList.contains("dark");
 }
