@@ -161,7 +161,7 @@ export default async function Home() {
           )}
         </section>
 
-        <SessionPanel session={session} />
+        {/* <SessionPanel session={session} /> */}
       </main>
     </div>
   );

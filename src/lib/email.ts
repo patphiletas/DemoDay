@@ -5,6 +5,15 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "AlterNative <onboarding@resend.dev>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+function h(str: string) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 export async function sendWelcomeEmail(to: string, name: string) {
   await resend.emails.send({
     from: FROM,
@@ -12,7 +21,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
     subject: "Bienvenue sur AlterNative !",
     html: `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px">
-        <h1 style="font-size:24px;margin-bottom:8px">Bienvenue, ${name} !</h1>
+        <h1 style="font-size:24px;margin-bottom:8px">Bienvenue, ${h(name)} !</h1>
         <p style="color:#555;line-height:1.6">
           Ton compte AlterNative est créé. Tu peux dès maintenant soumettre tes manuscrits
           et interagir avec la communauté.
@@ -43,14 +52,14 @@ export async function sendManuscriptAcceptedEmail(
     subject: `Félicitations — "${title}" est accepté !`,
     html: `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px">
-        <h1 style="font-size:24px;margin-bottom:8px">Bonne nouvelle, ${name} !</h1>
+        <h1 style="font-size:24px;margin-bottom:8px">Bonne nouvelle, ${h(name)} !</h1>
         <p style="color:#555;line-height:1.6">
-          Ton manuscrit <strong>${title}</strong> a été accepté et publié sur AlterNative.
+          Ton manuscrit <strong>${h(title)}</strong> a été accepté et publié sur AlterNative.
         </p>
         ${
           editorNote
             ? `<blockquote style="border-left:3px solid #000;margin:20px 0;padding:8px 16px;color:#444">
-                ${editorNote}
+                ${h(editorNote)}
                </blockquote>`
             : ""
         }
@@ -75,15 +84,15 @@ export async function sendManuscriptRejectedEmail(
     subject: `Décision éditoriale — "${title}"`,
     html: `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px">
-        <h1 style="font-size:24px;margin-bottom:8px">Bonjour ${name},</h1>
+        <h1 style="font-size:24px;margin-bottom:8px">Bonjour ${h(name)},</h1>
         <p style="color:#555;line-height:1.6">
-          Après examen, ton manuscrit <strong>${title}</strong> n'a pas été retenu
+          Après examen, ton manuscrit <strong>${h(title)}</strong> n'a pas été retenu
           pour cette publication.
         </p>
         ${
           reason
             ? `<blockquote style="border-left:3px solid #999;margin:20px 0;padding:8px 16px;color:#444">
-                ${reason}
+                ${h(reason)}
                </blockquote>`
             : ""
         }
