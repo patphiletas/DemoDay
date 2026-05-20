@@ -88,21 +88,14 @@ export default async function Home() {
         <div className="grid gap-8 border-b pb-10 rule lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
           <div className="space-y-6">
             <p className="editorial-label">Édition indépendante</p>
-            <h1 className="font-serif-display text-5xl font-bold leading-none text-[color:var(--ink)] sm:text-6xl md:text-7xl">
-              AlterNative
+            <h1 className="font-serif-display text-5xl font-bold leading-none text-(--ink) sm:text-6xl md:text-7xl">
+              Alter<span className="text-(--ink)">Native</span>
             </h1>
             <p className="max-w-2xl text-xl leading-8 editorial-muted">
-              Une revue pour découvrir, lire et faire circuler des textes hors des circuits trop sages.
+              Une autre manière de découvrir, lire et diffuser des textes.
             </p>
           </div>
-          <div className="editorial-panel rounded-lg p-5">
-            <p className="font-serif-display text-2xl leading-tight text-[color:var(--ink)]">
-              Lire autrement, publier avec soin.
-            </p>
-            <p className="mt-3 text-sm leading-6 editorial-muted">
-              Manuscrits, commentaires, notes et comité éditorial vivent au même endroit.
-            </p>
-          </div>
+   
           {!session && (
             <div className="flex flex-wrap gap-3 lg:col-span-2">
               <a
@@ -125,17 +118,17 @@ export default async function Home() {
           <input id="compact-publications" type="checkbox" className="compact-toggle peer sr-only" />
           <div className="flex items-baseline justify-between gap-4">
             <div>
-              <h2 className="font-serif-display text-3xl font-bold text-[color:var(--ink)]">Dernières publications</h2>
+              <h2 className="font-serif-display text-3xl font-bold text-(--ink)">Dernières publications</h2>
               <p className="mt-1 text-sm editorial-muted">
                 Les textes récemment publiés par la communauté.
               </p>
             </div>
-            <label
+            {/* <label
               htmlFor="compact-publications"
-              className="btn-secondary min-h-0 cursor-pointer px-3 py-2 peer-checked:bg-[color:var(--ink)] peer-checked:text-[color:var(--paper)]"
+              className="btn-secondary min-h-0 cursor-pointer px-3 py-2 peer-checked:bg-(--ink) peer-checked:text-(--paper)"
             >
               Mode compact
-            </label>
+            </label> */}
           </div>
 
           {featuredPublications.length > 0 ? (
