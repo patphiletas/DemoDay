@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { manuscripts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { interactionRateLimit } from "@/lib/rate-limit";
 import { manuscriptSchema } from "@/lib/validation";
 
 export type ManuscriptSubmissionState = { error: string } | null;
@@ -20,6 +21,10 @@ export async function submitManuscriptAction(
 
   if (!session) {
     redirect("/signin");
+  }
+
+  if (!interactionRateLimit("manuscript", session.user.id)) {
+    return { error: "Trop de soumissions. Réessaie dans une minute." };
   }
 
   const result = manuscriptSchema.safeParse({

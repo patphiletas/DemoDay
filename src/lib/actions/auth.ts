@@ -1,6 +1,7 @@
 "use server";
 import { auth } from "@/lib/auth";
 import { sendWelcomeEmail } from "@/lib/email";
+import { authRateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { signupSchema, signinSchema } from "@/lib/validation";
@@ -11,6 +12,10 @@ export async function signupAction(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
+  if (!(await authRateLimit("signup"))) {
+    return { error: "Trop de tentatives. Réessaie dans 15 minutes." };
+  }
+
   if (formData.get("password") !== formData.get("confirmPassword")) {
     return { error: "Les mots de passe ne correspondent pas." };
   }
@@ -47,6 +52,10 @@ export async function signinAction(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
+  if (!(await authRateLimit("signin"))) {
+    return { error: "Trop de tentatives. Réessaie dans 15 minutes." };
+  }
+
   const result = signinSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

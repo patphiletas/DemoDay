@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { comments, ratings } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { interactionRateLimit } from "@/lib/rate-limit";
 import { commentSchema, ratingSchema } from "@/lib/validation";
 
 async function requireUserId() {
@@ -58,6 +59,11 @@ export async function ratePublicationAction(formData: FormData) {
 
 export async function commentPublicationAction(formData: FormData) {
   const userId = await requireUserId();
+
+  if (!interactionRateLimit("comment", userId)) {
+    return;
+  }
+
   const result = commentSchema.safeParse({
     content: formData.get("content"),
     publicationId: Number(formData.get("publicationId")),
