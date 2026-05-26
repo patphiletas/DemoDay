@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { HorizontalScroll } from "@/components/HorizontalScroll";
 import { PublicationCard } from "@/components/PublicationCard";
+import { SearchBar } from "@/components/SearchBar";
 import { SessionPanel } from "@/components/SessionPanel";
-import { and, avg, count, desc, eq, gt, inArray, sql } from "drizzle-orm";
+import { and, avg, count, desc, eq, gt, ilike, inArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -10,8 +12,26 @@ import { comments, publications, ratings, users } from "@/db/schema";
 
 const publicationAuthors = alias(users, "publication_authors");
 
-export default async function Home() {
-  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const [session, resolvedParams] = await Promise.all([
+    auth.api.getSession({ headers: await headers() }).catch(() => null),
+    searchParams,
+  ]);
+
+  const q = typeof resolvedParams.q === "string" ? resolvedParams.q.trim() : "";
+
+  const searchFilter = q
+    ? or(
+        ilike(publications.title, `%${q}%`),
+        ilike(publications.pitch, `%${q}%`),
+        ilike(publications.category, `%${q}%`),
+        ilike(publications.creditedAuthorName, `%${q}%`),
+      )
+    : undefined;
 
   const featuredPublications = await db
     .select({
@@ -27,9 +47,9 @@ export default async function Home() {
     })
     .from(publications)
     .innerJoin(publicationAuthors, eq(publications.authorId, publicationAuthors.id))
-    .where(eq(publications.isVisible, true))
+    .where(searchFilter ? and(eq(publications.isVisible, true), searchFilter) : eq(publications.isVisible, true))
     .orderBy(desc(publications.publishedAt))
-    .limit(6);
+    .limit(q ? 50 : 6);
 
   const publicationIds = featuredPublications.map((p) => p.id);
 
@@ -116,19 +136,20 @@ export default async function Home() {
 
         <section className="space-y-6">
           <input id="compact-publications" type="checkbox" className="compact-toggle peer sr-only" />
-          <div className="flex items-baseline justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="font-serif-display text-3xl font-bold text-(--ink)">Dernières publications</h2>
+              <h2 className="font-serif-display text-3xl font-bold text-(--ink)">
+                {q ? `Résultats pour « ${q} »` : "Dernières publications"}
+              </h2>
               <p className="mt-1 text-sm editorial-muted">
-                Les textes récemment publiés par la communauté.
+                {q
+                  ? `${featuredPublications.length} publication${featuredPublications.length !== 1 ? "s" : ""} trouvée${featuredPublications.length !== 1 ? "s" : ""}.`
+                  : "Les textes récemment publiés par la communauté."}
               </p>
             </div>
-            {/* <label
-              htmlFor="compact-publications"
-              className="btn-secondary min-h-0 cursor-pointer px-3 py-2 peer-checked:bg-(--ink) peer-checked:text-(--paper)"
-            >
-              Mode compact
-            </label> */}
+            <Suspense fallback={null}>
+              <SearchBar />
+            </Suspense>
           </div>
 
           {featuredPublications.length > 0 ? (
