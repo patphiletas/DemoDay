@@ -185,7 +185,8 @@ body::before {
 }
 
 .publication-card {
-  min-width: 230px;
+  width: 230px;
+  flex-shrink: 0;
 }
 
 .publication-card-cover {
@@ -193,7 +194,7 @@ body::before {
 }
 
 .compact-toggle:checked ~ .publication-feed .publication-card {
-  min-width: 210px;
+  width: 210px;
 }
 
 .compact-toggle:checked ~ .publication-feed .publication-card-cover {
@@ -211,10 +212,10 @@ body::before {
 
 @media (min-width: 640px) {
   .publication-card {
-    min-width: 280px;
+    width: 280px;
   }
 
   .compact-toggle:checked ~ .publication-feed .publication-card {
-    min-width: 230px;
+    width: 230px;
   }
 }
