@@ -40,7 +40,7 @@ export function PublicationCard({
 }: Props) {
   return (
     <article className="publication-card editorial-surface snap-start overflow-hidden rounded-lg">
-      <Link href={`/publications/${publication.slug}`} className="publication-card-cover block bg-[color:var(--paper-muted)]">
+      <Link href={`/publications/${publication.slug}`} className="publication-card-cover block bg-(--paper-muted)">
         {publication.coverImageUrl ? (
           <Image
             src={publication.coverImageUrl}
@@ -98,11 +98,11 @@ export function PublicationCard({
           {publication.pitch}
         </p>
 
-        <div className="rounded-md bg-[color:var(--paper-muted)] px-3 py-2 text-sm editorial-muted">
+        <div className="rounded-md bg-(--paper-muted) px-3 py-2 text-sm editorial-muted">
           {ratingStat ? (
             <span>
               Moyenne :{" "}
-              <strong className="text-[color:var(--ink)]">
+              <strong className="text-(--ink)">
                 {ratingStat.average}/5
               </strong>{" "}
               ({ratingStat.count} avis)
@@ -121,9 +121,9 @@ export function PublicationCard({
               {comments.map((comment) => (
                 <div
                   key={comment.id}
-                  className="rounded-md bg-[color:var(--paper-muted)] p-3 text-sm"
+                  className="rounded-md bg-(--paper-muted) p-3 text-sm"
                 >
-                  <p className="font-semibold text-[color:var(--ink)]">
+                  <p className="font-semibold text-(--ink)">
                     {comment.authorName}
                   </p>
                   <p className="mt-1 line-clamp-3 editorial-muted">
