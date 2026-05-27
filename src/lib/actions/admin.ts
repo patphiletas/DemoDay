@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { comments, manuscripts, notifications, publications, users } from "@/db/schema";
 import { db } from "@/lib/db";
+import { uploadCover } from "@/lib/cloudinary";
 import { sendManuscriptAcceptedEmail, sendManuscriptRejectedEmail } from "@/lib/email";
 import { requireAdmin } from "@/lib/session";
 import { slugify } from "@/lib/utils";
@@ -14,6 +15,15 @@ export async function acceptManuscriptAction(formData: FormData) {
   const manuscriptId = Number(formData.get("manuscriptId"));
   const editorNote = String(formData.get("editorNote") ?? "").trim();
   const pitch = String(formData.get("pitch") ?? "").trim();
+
+  const coverFile = formData.get("coverFile");
+  const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
+  let coverImageUrl: string | null = null;
+  if (coverFile instanceof File && coverFile.size > 0) {
+    coverImageUrl = await uploadCover(coverFile);
+  } else if (coverUrlInput) {
+    coverImageUrl = coverUrlInput;
+  }
 
   const manuscript = await db.query.manuscripts.findFirst({
     where: eq(manuscripts.id, manuscriptId),
@@ -35,6 +45,7 @@ export async function acceptManuscriptAction(formData: FormData) {
       content: manuscript.content,
       category: manuscript.category ?? "Autre",
       pitch: pitch || manuscript.title,
+      coverImageUrl,
       creditedAuthorName: manuscript.creditedAuthorName,
       authorId: manuscript.authorId,
       isVisible: true,

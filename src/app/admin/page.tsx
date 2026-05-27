@@ -139,7 +139,7 @@ export default async function AdminPage() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     {/* Accepter */}
-                    <form action={acceptManuscriptAction} className="space-y-2">
+                    <form action={acceptManuscriptAction} encType="multipart/form-data" className="space-y-2">
                       <input type="hidden" name="manuscriptId" value={m.id} />
                       <input
                         type="text"
@@ -154,6 +154,22 @@ export default async function AdminPage() {
                         placeholder="Message pour l'auteur (optionnel)"
                         className="field resize-none px-3 py-2 text-sm"
                       />
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold editorial-muted">Image de couverture</p>
+                        <input
+                          type="file"
+                          name="coverFile"
+                          accept="image/*"
+                          className="w-full cursor-pointer rounded-md border border-(--line) bg-(--paper) px-3 py-1.5 text-xs text-(--ink-soft) file:mr-3 file:rounded file:border-0 file:bg-(--paper-muted) file:px-2 file:py-1 file:text-xs file:font-semibold file:text-(--ink)"
+                        />
+                        <input
+                          type="url"
+                          name="coverImageUrl"
+                          placeholder="ou coller une URL d'image"
+                          className="field px-3 py-2 text-sm"
+                        />
+                        <p className="text-xs editorial-muted">Le fichier a priorité sur l'URL.</p>
+                      </div>
                       <button
                         type="submit"
                         className="w-full rounded-md bg-[color:var(--sage)] px-3 py-2 text-sm font-bold text-white hover:bg-[color:var(--blueprint)]"
