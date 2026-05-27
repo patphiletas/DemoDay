@@ -2,40 +2,11 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { comments, manuscripts, notifications, publications, users } from "@/db/schema";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import {
-  sendManuscriptAcceptedEmail,
-  sendManuscriptRejectedEmail,
-} from "@/lib/email";
-
-async function requireAdmin() {
-  const session = await auth.api
-    .getSession({ headers: await headers() })
-    .catch(() => null);
-
-  if (!session) redirect("/signin");
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-  });
-
-  if (user?.role !== "admin") redirect("/");
-
-  return session.user.id;
-}
-
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+import { sendManuscriptAcceptedEmail, sendManuscriptRejectedEmail } from "@/lib/email";
+import { requireAdmin } from "@/lib/session";
+import { slugify } from "@/lib/utils";
 
 export async function acceptManuscriptAction(formData: FormData) {
   await requireAdmin();
@@ -57,27 +28,29 @@ export async function acceptManuscriptAction(formData: FormData) {
   const baseSlug = slugify(manuscript.title);
   const slug = `${baseSlug}-${manuscriptId}`;
 
-  await db.insert(publications).values({
-    slug,
-    title: manuscript.title,
-    content: manuscript.content,
-    category: manuscript.category ?? "Autre",
-    pitch: pitch || manuscript.title,
-    creditedAuthorName: manuscript.creditedAuthorName,
-    authorId: manuscript.authorId,
-    isVisible: true,
-  });
+  await db.transaction(async (tx) => {
+    await tx.insert(publications).values({
+      slug,
+      title: manuscript.title,
+      content: manuscript.content,
+      category: manuscript.category ?? "Autre",
+      pitch: pitch || manuscript.title,
+      creditedAuthorName: manuscript.creditedAuthorName,
+      authorId: manuscript.authorId,
+      isVisible: true,
+    });
 
-  await db
-    .update(manuscripts)
-    .set({ status: "accepted", reviewedAt: new Date() })
-    .where(eq(manuscripts.id, manuscriptId));
+    await tx
+      .update(manuscripts)
+      .set({ status: "accepted", reviewedAt: new Date() })
+      .where(eq(manuscripts.id, manuscriptId));
 
-  await db.insert(notifications).values({
-    userId: manuscript.authorId,
-    type: "manuscript_accepted",
-    relatedId: manuscriptId,
-    message: editorNote || "Votre manuscrit a été accepté et publié.",
+    await tx.insert(notifications).values({
+      userId: manuscript.authorId,
+      type: "manuscript_accepted",
+      relatedId: manuscriptId,
+      message: editorNote || "Votre manuscrit a été accepté et publié.",
+    });
   });
 
   if (author) {

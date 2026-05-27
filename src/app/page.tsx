@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import { HorizontalScroll } from "@/components/HorizontalScroll";
 import { PublicationCard } from "@/components/PublicationCard";
 import { SearchBar } from "@/components/SearchBar";
-import { SessionPanel } from "@/components/SessionPanel";
 import { and, avg, count, desc, eq, gt, ilike, inArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { auth } from "@/lib/auth";
@@ -175,7 +174,6 @@ export default async function Home({
           )}
         </section>
 
-        {/* <SessionPanel session={session} /> */}
       </main>
     </div>
   );

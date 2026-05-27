@@ -1,6 +1,7 @@
 import {
   integer,
   pgTable,
+  uniqueIndex,
   varchar,
   text,
   timestamp,
@@ -107,17 +108,21 @@ export const comments = pgTable("comments", {
   isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
-export const ratings = pgTable("ratings", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  score: integer("score").notNull(),
-  publicationId: integer("publication_id")
-    .notNull()
-    .references(() => publications.id),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+export const ratings = pgTable(
+  "ratings",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    score: integer("score").notNull(),
+    publicationId: integer("publication_id")
+      .notNull()
+      .references(() => publications.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("ratings_publication_user_idx").on(t.publicationId, t.userId)],
+);
 
 export const reports = pgTable("reports", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),

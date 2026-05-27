@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { and, asc, avg, count, desc, eq, gt, lt } from "drizzle-orm";
+import { and, avg, count, desc, eq, gt, lt } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Image from "next/image";
 import Link from "next/link";
@@ -80,26 +80,16 @@ export default async function PublicationPage({
     db
       .select({ slug: publications.slug, title: publications.title })
       .from(publications)
-      .where(
-        and(
-          eq(publications.isVisible, true),
-          lt(publications.publishedAt, publication.publishedAt)
-        )
-      )
-      .orderBy(desc(publications.publishedAt))
+      .where(and(eq(publications.isVisible, true), lt(publications.id, publication.id)))
+      .orderBy(desc(publications.id))
       .limit(1)
       .then((rows) => rows[0] ?? null),
 
     db
       .select({ slug: publications.slug, title: publications.title })
       .from(publications)
-      .where(
-        and(
-          eq(publications.isVisible, true),
-          gt(publications.publishedAt, publication.publishedAt)
-        )
-      )
-      .orderBy(asc(publications.publishedAt))
+      .where(and(eq(publications.isVisible, true), gt(publications.id, publication.id)))
+      .orderBy(desc(publications.id))
       .limit(1)
       .then((rows) => rows[0] ?? null),
   ]);
