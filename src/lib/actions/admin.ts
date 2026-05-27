@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { comments, manuscripts, notifications, publications, users } from "@/db/schema";
+import { comments, manuscripts, notifications, publications, ratings, users } from "@/db/schema";
 import { db } from "@/lib/db";
 import { uploadCover } from "@/lib/cloudinary";
 import { sendManuscriptAcceptedEmail, sendManuscriptRejectedEmail } from "@/lib/email";
@@ -14,13 +14,18 @@ export async function editManuscriptContentAction(formData: FormData) {
 
   const manuscriptId = Number(formData.get("manuscriptId"));
   const title = String(formData.get("title") ?? "").trim();
+  const creditedAuthorName = String(formData.get("creditedAuthorName") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
 
   if (!content || content.length < 10) return;
 
   await db
     .update(manuscripts)
-    .set({ ...(title && { title }), content })
+    .set({
+      ...(title && { title }),
+      ...(creditedAuthorName && { creditedAuthorName }),
+      content,
+    })
     .where(eq(manuscripts.id, manuscriptId));
 
   revalidatePath("/admin");
@@ -43,11 +48,12 @@ export async function acceptManuscriptAction(formData: FormData) {
   const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
   let coverImageUrl: string | null = null;
   if (coverFile instanceof File && coverFile.size > 0 && coverFile.type.startsWith("image/")) {
-    coverImageUrl = await uploadCover(coverFile);
-  } else if (coverUrlInput) {
+    coverImageUrl = await uploadCover(coverFile).catch(() => null);
+  }
+  if (!coverImageUrl && coverUrlInput) {
     coverImageUrl = coverUrlInput;
-  } else {
-    // fallback : image proposée par l'auteur à la soumission
+  }
+  if (!coverImageUrl) {
     coverImageUrl = manuscript.coverImageUrl ?? null;
   }
 
@@ -73,7 +79,12 @@ export async function acceptManuscriptAction(formData: FormData) {
 
     await tx
       .update(manuscripts)
-      .set({ status: "accepted", reviewedAt: new Date() })
+      .set({
+        status: "accepted",
+        reviewedAt: new Date(),
+        pitch: pitch || manuscript.title,
+        coverImageUrl: coverImageUrl ?? manuscript.coverImageUrl,
+      })
       .where(eq(manuscripts.id, manuscriptId));
 
     await tx.insert(notifications).values({
@@ -153,6 +164,8 @@ export async function unpublishAction(formData: FormData) {
 
   if (!pub) return;
 
+  await db.delete(ratings).where(eq(ratings.publicationId, publicationId));
+  await db.delete(comments).where(eq(comments.publicationId, publicationId));
   await db.delete(publications).where(eq(publications.id, publicationId));
 
   // Repasse le manuscrit accepté de cet auteur avec ce titre en "submitted"
@@ -164,9 +177,39 @@ export async function unpublishAction(formData: FormData) {
   if (relatedManuscript) {
     await db
       .update(manuscripts)
-      .set({ status: "submitted", reviewedAt: null })
+      .set({
+        status: "submitted",
+        reviewedAt: null,
+        pitch: pub.pitch,
+        coverImageUrl: pub.coverImageUrl ?? relatedManuscript.coverImageUrl,
+      })
       .where(eq(manuscripts.id, relatedManuscript.id));
   }
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+export async function updatePublicationCoverAction(formData: FormData) {
+  await requireAdmin();
+
+  const publicationId = Number(formData.get("publicationId"));
+  const coverFile = formData.get("coverFile");
+  const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
+
+  let coverImageUrl: string | null = null;
+  if (coverFile instanceof File && coverFile.size > 0 && coverFile.type.startsWith("image/")) {
+    coverImageUrl = await uploadCover(coverFile).catch(() => null);
+  }
+  if (!coverImageUrl && coverUrlInput) {
+    coverImageUrl = coverUrlInput;
+  }
+  if (coverImageUrl === null) return;
+
+  await db
+    .update(publications)
+    .set({ coverImageUrl })
+    .where(eq(publications.id, publicationId));
 
   revalidatePath("/admin");
   revalidatePath("/");

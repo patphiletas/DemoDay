@@ -15,6 +15,13 @@
       "when": 1779197054961,
       "tag": "0001_concerned_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779908166154,
+      "tag": "0002_easy_fallen_one",
+      "breakpoints": true
     }
   ]
 }

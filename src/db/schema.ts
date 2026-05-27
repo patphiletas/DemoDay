@@ -67,6 +67,7 @@ export const manuscripts = pgTable("manuscripts", {
   category: varchar("category", { length: 100 }),
   creditedAuthorName: varchar("credited_author_name", { length: 255 }).notNull(),
   coverImageUrl: text("cover_image_url"),
+  pitch: text("pitch"),
   authorId: text("author_id")
     .notNull()
     .references(() => users.id),

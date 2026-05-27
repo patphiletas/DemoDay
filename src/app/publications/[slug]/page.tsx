@@ -13,6 +13,7 @@ import { db } from "@/lib/db";
 import { comments, publications, ratings, users } from "@/db/schema";
 import { parseChapters } from "@/lib/utils";
 import ScrollToTop from "@/components/ScrollToTop";
+import CoverZoom from "@/components/CoverZoom";
 
 const publicationAuthors = alias(users, "publication_authors");
 const commentAuthors = alias(users, "comment_authors");
@@ -150,14 +151,9 @@ export default async function PublicationPage({
         <header className="grid gap-8 border-b pb-8 rule lg:grid-cols-[280px_minmax(0,1fr)]">
           <div className="editorial-surface overflow-hidden rounded-lg">
             {publication.coverImageUrl ? (
-              <Image
+              <CoverZoom
                 src={publication.coverImageUrl}
                 alt={`Couverture de ${publication.title}`}
-                width={900}
-                height={1200}
-                className="aspect-[4/5] h-full w-full bg-[color:var(--paper-muted)] object-contain p-3"
-                unoptimized
-                priority
               />
             ) : (
               <div className="flex aspect-[4/5] flex-col justify-between bg-[color:var(--ink)] p-6">
@@ -256,7 +252,7 @@ export default async function PublicationPage({
               <div>
                 <p className="editorial-label">Avis</p>
                 <p className="mt-2 font-serif-display text-3xl font-bold text-[color:var(--ink)]">
-                  {averageScore ? `${averageScore}/5` : "Non noté"}
+                  {averageScore ? `★ ${averageScore}` : "Non noté"}
                 </p>
                 <p className="text-sm editorial-muted">
                   {ratingStats.count} avis
@@ -274,13 +270,13 @@ export default async function PublicationPage({
                         type="submit"
                         name="score"
                         value={score}
-                        className={`rounded-md border px-2 py-2 text-sm font-semibold transition-colors ${
-                          userRating?.score === score
+                        className={`rounded-md border px-2 py-2 text-base transition-colors ${
+                          userRating?.score !== undefined && score <= userRating.score
                             ? "accent-chip border-[color:var(--accent)]"
                             : "border-[color:var(--line)] bg-[color:var(--paper)] text-[color:var(--ink-soft)] hover:border-[color:var(--accent)]"
                         }`}
                       >
-                        {score}
+                        ★
                       </button>
                     ))}
                   </div>

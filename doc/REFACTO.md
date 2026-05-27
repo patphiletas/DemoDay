@@ -147,15 +147,16 @@ Si une seule publication existe, `lastPub` et `firstPub` sont `null` (filtre `ne
 | Fichier | Nature du changement |
 |---|---|
 | `src/lib/session.ts` | Créé — gardes d'auth partagés |
-| `src/lib/utils.ts` | Créé — `slugify` |
-| `src/lib/actions/admin.ts` | Transaction, imports nettoyés |
+| `src/lib/utils.ts` | Créé — `slugify`, `parseChapters` |
+| `src/lib/actions/admin.ts` | Transaction, validation image, édition manuscrit (titre, auteur, texte), couverture publication, pitch préservé |
 | `src/lib/actions/publication-interactions.ts` | Upsert natif, imports nettoyés |
-| `src/db/schema.ts` | `uniqueIndex` sur `ratings(publicationId, userId)` |
+| `src/db/schema.ts` | `uniqueIndex` ratings + colonne `pitch` sur `manuscripts` |
+| `src/db/migrations/0002_easy_fallen_one.sql` | Ajout `pitch` sur `manuscripts` |
 | `src/components/SessionPanel.tsx` | Supprimé |
-| `src/app/page.tsx` | Import `SessionPanel` retiré |
-| `src/app/publications/[slug]/page.tsx` | Navigation corrigée + défilement infini + index chapitres |
-| `src/components/ManuscriptSubmissionForm.tsx` | Textarea contrôlé, import EPUB |
+| `src/app/page.tsx` | Import `SessionPanel` retiré, limite publications supprimée |
+| `src/app/publications/[slug]/page.tsx` | Navigation, index chapitres, `CoverZoom`, `ScrollToTop` |
+| `src/components/ManuscriptSubmissionForm.tsx` | Textarea contrôlé, import EPUB, couverture pré-remplie |
 | `src/components/ScrollToTop.tsx` | Créé — bouton retour en haut |
+| `src/components/CoverZoom.tsx` | Créé — lightbox couverture |
 | `src/lib/epub.ts` | Créé — parsing EPUB, extraction couverture, fallback manifest |
 | `src/lib/cloudinary.ts` | Config lazy, `uploadCoverBuffer` |
-| `src/lib/actions/admin.ts` | Validation type image, `editManuscriptContentAction` |

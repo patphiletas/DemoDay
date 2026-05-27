@@ -12,6 +12,7 @@ import {
   restoreCommentAction,
   togglePublicationVisibilityAction,
   unpublishAction,
+  updatePublicationCoverAction,
 } from "@/lib/actions/admin";
 import { alias } from "drizzle-orm/pg-core";
 
@@ -41,6 +42,7 @@ export default async function AdminPage() {
         creditedAuthorName: manuscripts.creditedAuthorName,
         content: manuscripts.content,
         coverImageUrl: manuscripts.coverImageUrl,
+        pitch: manuscripts.pitch,
         status: manuscripts.status,
         submittedAt: manuscripts.submittedAt,
         submitterName: manuscriptAuthors.name,
@@ -61,6 +63,7 @@ export default async function AdminPage() {
         slug: publications.slug,
         isVisible: publications.isVisible,
         publishedAt: publications.publishedAt,
+        coverImageUrl: publications.coverImageUrl,
         submitterName: publicationAuthors.name,
       })
       .from(publications)
@@ -88,7 +91,7 @@ export default async function AdminPage() {
     <div className="page-shell">
       <div className="container-editorial max-w-5xl space-y-12">
         <div>
-          <h1 className="font-serif-display text-5xl font-bold text-[color:var(--ink)]">
+          <h1 className="font-serif-display text-5xl font-bold text-(--ink)">
             Administration
           </h1>
           <p className="mt-2 text-sm editorial-muted">
@@ -99,7 +102,7 @@ export default async function AdminPage() {
         {/* Manuscrits en attente */}
         <section className="space-y-4">
           <div className="flex items-center gap-3">
-            <h2 className="font-serif-display text-2xl font-bold text-[color:var(--ink)]">
+            <h2 className="font-serif-display text-2xl font-bold text-(--ink)">
               Manuscrits en attente
             </h2>
             <span className="accent-chip rounded-full px-2 py-0.5 text-xs font-bold">
@@ -118,7 +121,7 @@ export default async function AdminPage() {
                 >
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
-                      <p className="font-serif-display text-xl font-bold text-[color:var(--ink)]">
+                      <p className="font-serif-display text-xl font-bold text-(--ink)">
                         {m.title}
                       </p>
                       <p className="text-xs editorial-muted">
@@ -129,7 +132,7 @@ export default async function AdminPage() {
                   </div>
 
                   <details className="mb-4 group">
-                    <summary className="cursor-pointer select-none text-xs font-semibold editorial-muted hover:text-[color:var(--accent-dark)]">
+                    <summary className="cursor-pointer select-none text-xs font-semibold editorial-muted hover:text-(--accent-dark)">
                       Lire / modifier le texte
                     </summary>
                     <form action={editManuscriptContentAction} className="mt-2 space-y-2">
@@ -139,6 +142,13 @@ export default async function AdminPage() {
                         name="title"
                         defaultValue={m.title}
                         className="field px-3 py-2 text-sm font-semibold"
+                      />
+                      <input
+                        type="text"
+                        name="creditedAuthorName"
+                        defaultValue={m.creditedAuthorName}
+                        placeholder="Nom de l'auteur/autrice de l'œuvre"
+                        className="field px-3 py-2 text-sm"
                       />
                       <textarea
                         name="content"
@@ -163,6 +173,7 @@ export default async function AdminPage() {
                         type="text"
                         name="pitch"
                         placeholder="Pitch (accroche pour la page d'accueil)"
+                        defaultValue={m.pitch ?? ""}
                         required
                         className="field px-3 py-2 text-sm"
                       />
@@ -204,7 +215,7 @@ export default async function AdminPage() {
                       </div>
                       <button
                         type="submit"
-                        className="w-full rounded-md bg-[color:var(--sage)] px-3 py-2 text-sm font-bold text-white hover:bg-[color:var(--blueprint)]"
+                        className="w-full rounded-md bg-(--sage) px-3 py-2 text-sm font-bold text-white hover:bg-(--blueprint)"
                       >
                         Accepter et publier
                       </button>
@@ -236,7 +247,7 @@ export default async function AdminPage() {
 
         {/* Publications */}
         <section className="space-y-4">
-          <h2 className="font-serif-display text-2xl font-bold text-[color:var(--ink)]">
+          <h2 className="font-serif-display text-2xl font-bold text-(--ink)">
             Publications ({allPublications.length})
           </h2>
 
@@ -245,7 +256,7 @@ export default async function AdminPage() {
           ) : (
             <div className="editorial-surface overflow-hidden rounded-lg">
               <table className="w-full text-sm">
-                <thead className="border-b bg-[color:var(--paper-muted)] rule">
+                <thead className="border-b bg-(--paper-muted) rule">
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold editorial-muted">Titre</th>
                     <th className="px-4 py-3 text-left font-semibold editorial-muted">Auteur/autrice</th>
@@ -255,10 +266,10 @@ export default async function AdminPage() {
                     <th className="px-4 py-3 text-left font-semibold editorial-muted">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[color:var(--line)] bg-[color:var(--paper)]">
+                <tbody className="divide-y divide-(--line) bg-(--paper)">
                   {allPublications.map((pub) => (
                     <tr key={pub.id}>
-                      <td className="px-4 py-3 font-semibold text-[color:var(--ink)]">
+                      <td className="px-4 py-3 font-semibold text-(--ink)">
                         {pub.title}
                       </td>
                       <td className="px-4 py-3 editorial-muted">{pub.creditedAuthorName}</td>
@@ -276,26 +287,55 @@ export default async function AdminPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <form action={togglePublicationVisibilityAction}>
-                            <input type="hidden" name="publicationId" value={pub.id} />
-                            <input type="hidden" name="isVisible" value={String(pub.isVisible)} />
-                            <button
-                              type="submit"
-                              className="rounded border border-[color:var(--line)] px-2 py-1 text-xs font-semibold editorial-muted hover:border-[color:var(--accent)]"
-                            >
-                              {pub.isVisible ? "Masquer" : "Afficher"}
-                            </button>
-                          </form>
-                          <form action={unpublishAction}>
-                            <input type="hidden" name="publicationId" value={pub.id} />
-                            <button
-                              type="submit"
-                              className="accent-chip rounded border border-[color:var(--accent)] px-2 py-1 text-xs font-semibold"
-                            >
-                              Remettre en manuscrit
-                            </button>
-                          </form>
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <form action={togglePublicationVisibilityAction}>
+                              <input type="hidden" name="publicationId" value={pub.id} />
+                              <input type="hidden" name="isVisible" value={String(pub.isVisible)} />
+                              <button
+                                type="submit"
+                                className="rounded border border-(--line) px-2 py-1 text-xs font-semibold editorial-muted hover:border-(--accent)"
+                              >
+                                {pub.isVisible ? "Masquer" : "Afficher"}
+                              </button>
+                            </form>
+                            <form action={unpublishAction}>
+                              <input type="hidden" name="publicationId" value={pub.id} />
+                              <button
+                                type="submit"
+                                className="accent-chip rounded border border-(--accent) px-2 py-1 text-xs font-semibold"
+                              >
+                                Remettre en manuscrit
+                              </button>
+                            </form>
+                          </div>
+                          <details>
+                            <summary className="cursor-pointer select-none text-xs font-semibold editorial-muted hover:text-(--accent-dark)">
+                              {pub.coverImageUrl ? "Modifier la couverture" : "Ajouter une couverture"}
+                            </summary>
+                            <form action={updatePublicationCoverAction} encType="multipart/form-data" className="mt-2 space-y-1">
+                              <input type="hidden" name="publicationId" value={pub.id} />
+                              {pub.coverImageUrl && (
+                                <img src={pub.coverImageUrl} alt="" className="h-12 rounded object-cover" />
+                              )}
+                              <input
+                                type="file"
+                                name="coverFile"
+                                accept="image/*"
+                                className="w-full cursor-pointer rounded border border-(--line) bg-(--paper) px-2 py-1 text-xs text-(--ink-soft) file:mr-2 file:rounded file:border-0 file:bg-(--paper-muted) file:px-2 file:py-0.5 file:text-xs file:font-semibold"
+                              />
+                              <input
+                                type="url"
+                                name="coverImageUrl"
+                                defaultValue={pub.coverImageUrl ?? ""}
+                                placeholder="ou URL d'image"
+                                className="field px-2 py-1 text-xs"
+                              />
+                              <button type="submit" className="rounded border border-(--line) bg-(--paper) px-2 py-1 text-xs font-semibold editorial-muted hover:text-(--ink)">
+                                Enregistrer
+                              </button>
+                            </form>
+                          </details>
                         </div>
                       </td>
                     </tr>
@@ -308,7 +348,7 @@ export default async function AdminPage() {
 
         {/* Commentaires */}
         <section className="space-y-4">
-          <h2 className="font-serif-display text-2xl font-bold text-[color:var(--ink)]">
+          <h2 className="font-serif-display text-2xl font-bold text-(--ink)">
             Commentaires ({allComments.length})
           </h2>
 
@@ -321,13 +361,13 @@ export default async function AdminPage() {
                   key={c.id}
                   className={`flex items-start gap-4 rounded-xl border p-4 ${
                     c.isDeleted
-                      ? "border-[color:var(--line)] bg-[color:var(--paper-muted)] opacity-55"
+                      ? "border-(--line) bg-(--paper-muted) opacity-55"
                       : "editorial-surface"
                   }`}
                 >
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[color:var(--ink)]">
+                      <span className="text-sm font-semibold text-(--ink)">
                         {c.authorName}
                       </span>
                       <span className="text-xs editorial-muted">{c.authorEmail}</span>
@@ -354,7 +394,7 @@ export default async function AdminPage() {
                         <input type="hidden" name="commentId" value={c.id} />
                         <button
                           type="submit"
-                          className="rounded border border-[color:var(--line)] px-2 py-1 text-xs font-semibold editorial-muted hover:border-[color:var(--accent)]"
+                          className="rounded border border-(--line) px-2 py-1 text-xs font-semibold editorial-muted hover:border-(--accent)"
                         >
                           Restaurer
                         </button>

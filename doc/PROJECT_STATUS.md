@@ -28,17 +28,20 @@
 - [x] Accès restreint par rôle (`role === "admin"`)
 - [x] Acceptation de manuscrit → création publication (transaction DB) + notification + email
 - [x] Upload d'image de couverture via Cloudinary ou URL externe à l'acceptation
-- [x] Édition du texte du manuscrit avant publication (`editManuscriptContentAction`)
+- [x] Édition titre, nom d'auteur, texte du manuscrit avant publication (`editManuscriptContentAction`)
+- [x] Mise à jour de la couverture d'une publication existante (`updatePublicationCoverAction`)
 - [x] Rejet de manuscrit → raison + notification + email
-- [x] Dépublication / toggle visibilité
+- [x] Dépublication → suppression publication (ratings + commentaires inclus), retour manuscrit en "submitted" avec pitch et couverture préservés
+- [x] Toggle visibilité (masquer/afficher sans dépublier)
 - [x] Modération des commentaires (soft delete, restore)
 
 ### Publications & interactions
-- [x] Homepage avec carousel horizontal des publications
+- [x] Homepage avec carousel horizontal des publications (sans limite de nombre)
 - [x] Barre de recherche full-text (ILIKE) sur titre, pitch, catégorie, auteur — URL partageable `?q=`
 - [x] Route dynamique `/publications/[slug]`
 - [x] Navigation précédent / suivant avec défilement infini (wrap)
 - [x] Affichage structuré par chapitres avec index sticky dans la barre latérale
+- [x] Vue zoomée de la couverture (lightbox, fermeture Échap / clic extérieur)
 - [x] Bouton retour en haut de page (`ScrollToTop`)
 - [x] Système de notation 1–5 étoiles (upsert via `onConflictDoUpdate`)
 - [x] Commentaires avec modération
@@ -62,6 +65,7 @@
 - [x] Utilitaires extraits (`src/lib/utils.ts` — `slugify`, `parseChapters`)
 - [x] Upload Cloudinary encapsulé (`src/lib/cloudinary.ts` — config lazy, validation type image)
 - [x] Parser EPUB serveur (`src/lib/epub.ts` — `epub2`, fallback manifest, extraction couverture)
+- [x] Colonne `pitch` ajoutée à `manuscripts` (migration `0002`) — pitch et couverture préservés lors d'une dépublication
 
 ### Tests & CI/CD
 - [x] Vitest configuré
