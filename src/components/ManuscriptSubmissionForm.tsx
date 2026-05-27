@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { submitManuscriptAction } from "@/lib/actions/manuscripts";
 
 const categories = [
@@ -10,13 +10,46 @@ const categories = [
   "Essai",
   "Nouvelle",
   "Science-fiction",
+  "Les classiques",
 ];
 
 export default function ManuscriptSubmissionForm() {
-  const [state, formAction, isPending] = useActionState(
-    submitManuscriptAction,
-    null
-  );
+  const [state, formAction, isPending] = useActionState(submitManuscriptAction, null);
+  const [epubLoading, setEpubLoading] = useState(false);
+  const [epubError, setEpubError] = useState<string | null>(null);
+
+  const titleRef = useRef<HTMLInputElement>(null);
+  const authorRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+
+  async function handleEpubChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setEpubLoading(true);
+    setEpubError(null);
+
+    const fd = new FormData();
+    fd.append("file", file);
+
+    try {
+      const res = await fetch("/api/parse-epub", { method: "POST", body: fd });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setEpubError(data.error ?? "Erreur lors de l'import.");
+        return;
+      }
+
+      if (titleRef.current && data.title) titleRef.current.value = data.title;
+      if (authorRef.current && data.author) authorRef.current.value = data.author;
+      if (contentRef.current && data.content) contentRef.current.value = data.content;
+    } catch {
+      setEpubError("Impossible de contacter le serveur.");
+    } finally {
+      setEpubLoading(false);
+    }
+  }
 
   return (
     <form action={formAction} encType="multipart/form-data" className="space-y-6">
@@ -26,15 +59,33 @@ export default function ManuscriptSubmissionForm() {
         </div>
       )}
 
+      {/* Import EPUB */}
+      <div className="rounded-lg border border-(--line) bg-(--paper-muted) p-4 space-y-2">
+        <p className="text-sm font-semibold text-(--ink)">Importer un fichier EPUB</p>
+        <p className="text-xs editorial-muted">
+          Sélectionne un fichier <code>.epub</code> — titre, auteur et chapitres seront extraits automatiquement.
+        </p>
+        <input
+          type="file"
+          accept=".epub"
+          onChange={handleEpubChange}
+          disabled={epubLoading}
+          className="w-full cursor-pointer rounded-md border border-(--line) bg-(--paper) px-3 py-1.5 text-xs text-(--ink-soft) file:mr-3 file:rounded file:border-0 file:bg-(--paper-muted) file:px-2 file:py-1 file:text-xs file:font-semibold file:text-(--ink) disabled:opacity-50"
+        />
+        {epubLoading && <p className="text-xs editorial-muted">Extraction en cours…</p>}
+        {epubError && <p className="text-xs font-semibold text-red-600">{epubError}</p>}
+        <p className="text-xs editorial-muted">
+          Tu peux aussi remplir les champs ci-dessous manuellement, ou corriger les valeurs extraites.
+        </p>
+      </div>
+
       <div className="grid gap-5 md:grid-cols-[2fr_1fr]">
         <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-semibold text-[color:var(--ink)]"
-          >
+          <label htmlFor="title" className="block text-sm font-semibold text-(--ink)">
             Titre
           </label>
           <input
+            ref={titleRef}
             id="title"
             name="title"
             type="text"
@@ -47,10 +98,7 @@ export default function ManuscriptSubmissionForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="category"
-            className="block text-sm font-semibold text-[color:var(--ink)]"
-          >
+          <label htmlFor="category" className="block text-sm font-semibold text-(--ink)">
             Catégorie
           </label>
           <select
@@ -60,26 +108,20 @@ export default function ManuscriptSubmissionForm() {
             className="field mt-2 px-3 py-2 text-sm"
             defaultValue=""
           >
-            <option value="" disabled>
-              Choisir
-            </option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
+            <option value="" disabled>Choisir</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
         </div>
       </div>
 
       <div>
-        <label
-          htmlFor="creditedAuthorName"
-          className="block text-sm font-semibold text-[color:var(--ink)]"
-        >
+        <label htmlFor="creditedAuthorName" className="block text-sm font-semibold text-(--ink)">
           Auteur/autrice crédité·e
         </label>
         <input
+          ref={authorRef}
           id="creditedAuthorName"
           name="creditedAuthorName"
           type="text"
@@ -95,13 +137,14 @@ export default function ManuscriptSubmissionForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="content"
-          className="block text-sm font-semibold text-[color:var(--ink)]"
-        >
+        <label htmlFor="content" className="block text-sm font-semibold text-(--ink)">
           Texte
         </label>
+        <p className="mt-1 text-xs editorial-muted">
+          Pour structurer en chapitres, commence chaque titre par <code>##</code> (ex : <code>## Chapitre 1</code>).
+        </p>
         <textarea
+          ref={contentRef}
           id="content"
           name="content"
           required
@@ -138,7 +181,7 @@ export default function ManuscriptSubmissionForm() {
       <div className="flex items-center justify-end gap-3 border-t pt-5 rule">
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || epubLoading}
           className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Soumission..." : "Soumettre le manuscrit"}

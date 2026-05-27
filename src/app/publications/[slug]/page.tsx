@@ -11,6 +11,7 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { comments, publications, ratings, users } from "@/db/schema";
+import { parseChapters } from "@/lib/utils";
 
 const publicationAuthors = alias(users, "publication_authors");
 const commentAuthors = alias(users, "comment_authors");
@@ -117,6 +118,8 @@ export default async function PublicationPage({
   const previousPublication = prevDirect ?? lastPublication;
   const nextPublication = nextDirect ?? firstPublication;
 
+  const chapters = parseChapters(publication.content);
+
   const averageScore =
     ratingStats.average !== null ? Number(ratingStats.average).toFixed(1) : null;
 
@@ -195,6 +198,11 @@ export default async function PublicationPage({
               <a href="#texte" className="btn-secondary min-h-0 px-3 py-2">
                 Lire
               </a>
+              {chapters.length > 0 && (
+                <a href="#sommaire" className="btn-secondary min-h-0 px-3 py-2">
+                  {chapters.length} chapitre{chapters.length > 1 ? "s" : ""}
+                </a>
+              )}
               <a href="#avis" className="btn-secondary min-h-0 px-3 py-2">
                 Avis et commentaires
               </a>
@@ -204,9 +212,39 @@ export default async function PublicationPage({
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
           <article id="texte" className="order-2 lg:order-1">
-            <div className="whitespace-pre-wrap font-serif-display text-lg leading-8 text-[color:var(--ink)]">
-              {publication.content}
-            </div>
+            {chapters.length > 0 ? (
+              <div className="space-y-12">
+                <nav id="sommaire" className="rounded-lg border border-(--line) bg-(--paper-muted) p-5 space-y-2">
+                  <p className="editorial-label">Sommaire</p>
+                  <ol className="space-y-1">
+                    {chapters.map((ch, i) => (
+                      <li key={i}>
+                        <a
+                          href={`#ch-${i}`}
+                          className="text-sm text-(--ink-soft) hover:text-(--accent-dark) hover:underline"
+                        >
+                          {ch.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </nav>
+                {chapters.map((ch, i) => (
+                  <section key={i} id={`ch-${i}`} className="scroll-mt-24 space-y-4">
+                    <h2 className="font-serif-display text-2xl font-bold text-(--ink) border-b pb-3 rule">
+                      {ch.title}
+                    </h2>
+                    <div className="whitespace-pre-wrap font-serif-display text-lg leading-8 text-(--ink)">
+                      {ch.content}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div className="whitespace-pre-wrap font-serif-display text-lg leading-8 text-(--ink)">
+                {publication.content}
+              </div>
+            )}
           </article>
 
           <aside id="avis" className="order-1 space-y-6 lg:sticky lg:top-24 lg:order-2">
