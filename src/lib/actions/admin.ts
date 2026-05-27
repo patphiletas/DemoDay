@@ -230,6 +230,16 @@ export async function togglePublicationVisibilityAction(formData: FormData) {
   revalidatePath("/");
 }
 
+export async function deleteManuscriptAction(formData: FormData) {
+  await requireAdmin();
+
+  const manuscriptId = Number(formData.get("manuscriptId"));
+
+  await db.delete(manuscripts).where(eq(manuscripts.id, manuscriptId));
+
+  revalidatePath("/admin");
+}
+
 export async function deleteCommentAction(formData: FormData) {
   await requireAdmin();
 

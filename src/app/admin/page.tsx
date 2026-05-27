@@ -7,6 +7,7 @@ import { comments, manuscripts, publications, users } from "@/db/schema";
 import {
   acceptManuscriptAction,
   deleteCommentAction,
+  deleteManuscriptAction,
   editManuscriptContentAction,
   rejectManuscriptAction,
   restoreCommentAction,
@@ -33,7 +34,7 @@ export default async function AdminPage() {
 
   if (currentUser?.role !== "admin") redirect("/");
 
-  const [pendingManuscripts, allPublications, allComments] = await Promise.all([
+  const [pendingManuscripts, rejectedManuscripts, allPublications, allComments] = await Promise.all([
     db
       .select({
         id: manuscripts.id,
@@ -52,6 +53,20 @@ export default async function AdminPage() {
       .from(manuscripts)
       .innerJoin(manuscriptAuthors, eq(manuscripts.authorId, manuscriptAuthors.id))
       .where(eq(manuscripts.status, "submitted"))
+      .orderBy(desc(manuscripts.submittedAt)),
+
+    db
+      .select({
+        id: manuscripts.id,
+        title: manuscripts.title,
+        creditedAuthorName: manuscripts.creditedAuthorName,
+        rejectionReason: manuscripts.rejectionReason,
+        submittedAt: manuscripts.submittedAt,
+        submitterName: manuscriptAuthors.name,
+      })
+      .from(manuscripts)
+      .innerJoin(manuscriptAuthors, eq(manuscripts.authorId, manuscriptAuthors.id))
+      .where(eq(manuscripts.status, "rejected"))
       .orderBy(desc(manuscripts.submittedAt)),
 
     db
@@ -239,6 +254,16 @@ export default async function AdminPage() {
                       </button>
                     </form>
                   </div>
+
+                  <form action={deleteManuscriptAction}>
+                    <input type="hidden" name="manuscriptId" value={m.id} />
+                    <button
+                      type="submit"
+                      className="mt-1 text-xs text-red-400 hover:text-red-600 hover:underline"
+                    >
+                      Supprimer définitivement
+                    </button>
+                  </form>
                 </div>
               ))}
             </div>
@@ -345,6 +370,40 @@ export default async function AdminPage() {
             </div>
           )}
         </section>
+
+        {/* Manuscrits refusés */}
+        {rejectedManuscripts.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="font-serif-display text-2xl font-bold text-(--ink)">
+              Manuscrits refusés ({rejectedManuscripts.length})
+            </h2>
+            <div className="divide-y divide-(--line) rounded-lg border border-(--line)">
+              {rejectedManuscripts.map((m) => (
+                <div key={m.id} className="flex items-center justify-between gap-4 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-(--ink)">{m.title}</p>
+                    <p className="text-xs editorial-muted">
+                      {m.creditedAuthorName} · déposé par {m.submitterName} ·{" "}
+                      {new Date(m.submittedAt).toLocaleDateString("fr-FR")}
+                    </p>
+                    {m.rejectionReason && (
+                      <p className="mt-0.5 truncate text-xs text-red-500">{m.rejectionReason}</p>
+                    )}
+                  </div>
+                  <form action={deleteManuscriptAction} className="shrink-0">
+                    <input type="hidden" name="manuscriptId" value={m.id} />
+                    <button
+                      type="submit"
+                      className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
+                    >
+                      Supprimer
+                    </button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Commentaires */}
         <section className="space-y-4">
