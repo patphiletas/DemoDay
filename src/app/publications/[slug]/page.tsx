@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { and, avg, count, desc, eq, gt, lt } from "drizzle-orm";
+import { and, asc, avg, count, desc, eq, gt, lt, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,7 +44,7 @@ export default async function PublicationPage({
 
   if (!publication) notFound();
 
-  const [ratingStats, allComments, userRating, previousPublication, nextPublication] = await Promise.all([
+  const [ratingStats, allComments, userRating, prevDirect, nextDirect, firstPublication, lastPublication] = await Promise.all([
     db
       .select({ average: avg(ratings.score), count: count(ratings.id) })
       .from(ratings)
@@ -77,6 +77,7 @@ export default async function PublicationPage({
         })
       : Promise.resolve(null),
 
+    // précédent direct (id inférieur)
     db
       .select({ slug: publications.slug, title: publications.title })
       .from(publications)
@@ -85,14 +86,36 @@ export default async function PublicationPage({
       .limit(1)
       .then((rows) => rows[0] ?? null),
 
+    // suivant direct (id supérieur)
     db
       .select({ slug: publications.slug, title: publications.title })
       .from(publications)
       .where(and(eq(publications.isVisible, true), gt(publications.id, publication.id)))
+      .orderBy(asc(publications.id))
+      .limit(1)
+      .then((rows) => rows[0] ?? null),
+
+    // premier (wrap depuis la fin)
+    db
+      .select({ slug: publications.slug, title: publications.title })
+      .from(publications)
+      .where(and(eq(publications.isVisible, true), ne(publications.id, publication.id)))
+      .orderBy(asc(publications.id))
+      .limit(1)
+      .then((rows) => rows[0] ?? null),
+
+    // dernier (wrap depuis le début)
+    db
+      .select({ slug: publications.slug, title: publications.title })
+      .from(publications)
+      .where(and(eq(publications.isVisible, true), ne(publications.id, publication.id)))
       .orderBy(desc(publications.id))
       .limit(1)
       .then((rows) => rows[0] ?? null),
   ]);
+
+  const previousPublication = prevDirect ?? lastPublication;
+  const nextPublication = nextDirect ?? firstPublication;
 
   const averageScore =
     ratingStats.average !== null ? Number(ratingStats.average).toFixed(1) : null;
