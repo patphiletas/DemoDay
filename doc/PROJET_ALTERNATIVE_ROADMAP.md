@@ -741,7 +741,7 @@ ratings
 - [x] Publications visibles publiquement
 - [x] Commentaires modérés
 - [x] Système de notation
-- [ ] Recherche et filtres
+- [x] Recherche et filtres (ILIKE sur homepage, URL partageable `?q=`)
 - [x] Routes dynamiques
 - [x] Validation Zod partout
 - [ ] Gestion d'erreurs centralisée
@@ -756,6 +756,7 @@ ratings
 - [x] Notifications in-app (acceptation / refus de manuscrit)
 - [x] Emails transactionnels via Resend
 - [x] Signalement de commentaires
+- [x] Upload d'images de couverture (Cloudinary + URL externe)
 - [ ] Système de "favoris"
 
 ---

@@ -20,7 +20,7 @@
 
 ## Aperçu
 
-AlterNative est une plateforme full-stack de gestion de publications : les auteurs soumettent des manuscrits, les admins les acceptent ou rejettent, et les lecteurs peuvent noter et commenter les œuvres publiées. Le projet couvre auth, BDD relationnelle, Server Actions, CI/CD et mode sombre.
+AlterNative est une plateforme full-stack de gestion de publications : les auteurs soumettent des manuscrits, les admins les acceptent ou rejettent, et les lecteurs peuvent noter et commenter les œuvres publiées. Le projet couvre auth, BDD relationnelle, Server Actions, upload d'images, CI/CD et mode sombre.
 
 lien vers la démo : https://demo-day-wine.vercel.app/
 
@@ -33,12 +33,14 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 | 🔐 Authentification | Signup / signin / signout via Better Auth, sessions HTTP-only |
 | 📝 Soumission de manuscrits | Formulaire avec validation Zod, statuts `submitted / accepted / rejected` |
 | 🏠 Homepage | Carousel horizontal des publications, notation et commentaires en session |
-| 📖 Page de lecture | Route dynamique `/publications/[slug]`, contenu complet, rating 1-5 étoiles |
+| 🔍 Recherche | Barre de recherche full-text (ILIKE) sur titre, pitch, catégorie, auteur — URL partageable (`?q=`) |
+| 📖 Page de lecture | Route dynamique `/publications/[slug]`, navigation précédent/suivant avec défilement infini |
+| 🖼️ Couvertures | Upload d'image via Cloudinary ou URL externe, saisi lors de l'acceptation du manuscrit |
 | 🛡️ Dashboard admin | Gestion des manuscrits en attente, modération des commentaires, visibilité des publications |
 | 👤 Dashboard perso | Manuscrits soumis, livres notés 5★, publications acceptées |
 | 📧 Emails transactionnels | Resend — confirmation d'inscription, notification d'acceptation/refus de manuscrit |
-| 🔔 Notifications in-app | Cloche en navbar, notifications de décision éditoriale |
 | 🌙 Mode sombre | Basculement manuel + respect de `prefers-color-scheme`, sans flash au chargement |
+| 🔒 Rate limiting | 5 tentatives/15 min sur auth, 10 interactions/min par utilisateur |
 | ✅ Tests & CI/CD | Vitest + GitHub Actions (lint + tests sur chaque push) + déploiement Vercel |
 
 ---
@@ -47,13 +49,14 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 
 | Couche | Technologie |
 |---|---|
-| Framework | Next.js 16.2.4 (App Router, Server Components, Server Actions) |
+| Framework | Next.js 16.2.6 (App Router, Server Components, Server Actions) |
 | Langage | TypeScript |
 | Style | Tailwind CSS v4 |
 | Base de données | PostgreSQL via [Neon](https://neon.tech) + Drizzle ORM |
 | Auth | [Better Auth](https://www.better-auth.com) ^1.6.9 |
 | Validation | Zod v4 |
 | Emails | [Resend](https://resend.com) ^6 |
+| Images | [Cloudinary](https://cloudinary.com) v2 |
 | Tests | Vitest v4 |
 | CI/CD | GitHub Actions + Vercel |
 
@@ -71,21 +74,24 @@ demoday/
 │   │   ├── manuscripts/     # soumission de manuscrit
 │   │   ├── publications/    # [slug] — page de lecture
 │   │   ├── layout.tsx       # root layout + ThemeProvider
-│   │   └── page.tsx         # homepage carousel
-│   ├── components/          # Navbar, ThemeToggle, ...
+│   │   └── page.tsx         # homepage carousel + recherche
+│   ├── components/          # Navbar, ThemeToggle, SearchBar, ...
 │   ├── db/
 │   │   ├── schema.ts        # tables Drizzle
 │   │   └── migrations/      # migrations SQL générées
 │   └── lib/
 │       ├── actions/         # server actions (auth, manuscripts, admin, interactions)
 │       ├── auth.ts          # config Better Auth
+│       ├── cloudinary.ts    # upload d'images vers Cloudinary
 │       ├── db.ts            # client Drizzle
-│       ├── email.ts         # emails transactionnels Resend (bienvenue, acceptation, refus)
+│       ├── email.ts         # emails transactionnels Resend
+│       ├── rate-limit.ts    # rate limiting in-memory
+│       ├── session.ts       # gardes d'auth partagés (requireSession, requireAdmin)
+│       ├── utils.ts         # utilitaires (slugify)
 │       └── validation.ts    # schemas Zod + types inférés
 ├── .github/
 │   └── workflows/
 │       └── learn-github-actions.yml  # CI : npm ci + npm test
-├── docker-compose.yml       # PostgreSQL local (alternative à Neon)
 └── drizzle.config.ts
 ```
 
@@ -111,8 +117,8 @@ verifications       comments                ratings
                     id                      id
                     content                 score (1–5)
                     publicationId (FK)      publicationId (FK)
-                    authorId (FK)           userId (FK)
-                    isModerated
+                    authorId (FK)           userId (FK) ──┐
+                    isModerated                           └ UNIQUE
                     isDeleted               notifications
                                             ─────────────
                     reports                 id
@@ -137,12 +143,14 @@ npm install
 DATABASE_URL=postgresql://user:password@host:5432/database?sslmode=require
 BETTER_AUTH_SECRET=your_secret
 BETTER_AUTH_URL=http://localhost:3000
-NEXT_PUBLIC_APP_URL=http://localhost:3000   # URL publique (utilisée dans les liens emails)
-RESEND_API_KEY=your_resend_key              # emails transactionnels via Resend
-```
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-> **PostgreSQL local (optionnel)** — le `docker-compose.yml` lance un PostgreSQL sur le port 5433.
-> `DATABASE_URL=postgresql://Pat:password@localhost:5433/mydatabase`
+RESEND_API_KEY=your_resend_key
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
 
 ---
 
@@ -184,6 +192,8 @@ Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exé
 | 5 | Tests unitaires | Vitest — validation schemas |
 | 6 | CI/CD | GitHub Actions + Vercel |
 | 7 | Mode sombre | `ThemeToggle` + `prefers-color-scheme` + Tailwind `dark:` |
+| 8 | Upload d'images | Cloudinary v2 depuis une Server Action |
+| 9 | Recherche serveur | `searchParams` + `ilike` Drizzle, URL partageable |
 | + | Emails transactionnels | Resend — bienvenue, acceptation, refus manuscrit |
 
 ---

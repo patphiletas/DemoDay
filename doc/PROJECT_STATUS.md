@@ -2,7 +2,7 @@
 
 **Status global**: ✅ Projet complet — déployé en production  
 **Date de départ**: 2026-04-27  
-**Dernière mise à jour**: 2026-05-19
+**Dernière mise à jour**: 2026-05-27
 
 ---
 
@@ -14,6 +14,7 @@
 - [x] Server Actions signup / signin / signout avec validation Zod
 - [x] Navbar avec état auth
 - [x] Routes privées protégées (redirect si non connecté)
+- [x] Rate limiting sur signup / signin (5 tentatives / 15 min par IP)
 
 ### Soumission de manuscrits
 - [x] Page de soumission (`/manuscripts/submit`)
@@ -23,18 +24,20 @@
 
 ### Dashboard admin
 - [x] Accès restreint par rôle (`role === "admin"`)
-- [x] Acceptation de manuscrit → création publication + notification + email
+- [x] Acceptation de manuscrit → création publication (transaction DB) + notification + email
+- [x] Upload d'image de couverture via Cloudinary ou URL externe à l'acceptation
 - [x] Rejet de manuscrit → raison + notification + email
 - [x] Dépublication / toggle visibilité
 - [x] Modération des commentaires (soft delete, restore)
-- [x] Gestion des signalements (reports)
 
 ### Publications & interactions
 - [x] Homepage avec carousel horizontal des publications
+- [x] Barre de recherche full-text (ILIKE) sur titre, pitch, catégorie, auteur — URL partageable `?q=`
 - [x] Route dynamique `/publications/[slug]`
-- [x] Système de notation 1–5 étoiles (unique par user)
+- [x] Navigation précédent / suivant avec défilement infini (wrap)
+- [x] Système de notation 1–5 étoiles (upsert via `onConflictDoUpdate`)
 - [x] Commentaires avec modération
-- [x] Signalement de commentaires
+- [x] Rate limiting sur commentaires (10 / min par utilisateur)
 
 ### Emails transactionnels (Resend)
 - [x] Email de bienvenue à l'inscription
@@ -49,6 +52,11 @@
 - [x] Mode sombre (ThemeToggle + `prefers-color-scheme` + Tailwind `dark:`)
 - [x] Pas de flash au chargement
 
+### Architecture
+- [x] Gardes d'auth partagés (`src/lib/session.ts` — `requireSession`, `requireAdmin`)
+- [x] Utilitaires extraits (`src/lib/utils.ts` — `slugify`)
+- [x] Upload Cloudinary encapsulé (`src/lib/cloudinary.ts`)
+
 ### Tests & CI/CD
 - [x] Vitest configuré
 - [x] Tests de validation Zod
@@ -59,8 +67,10 @@
 
 ## ❌ Non implémenté
 
-- [ ] Recherche & filtres (`/search?q=...`)
-- [ ] Page `error.tsx` + classes d'erreurs centralisées (`src/lib/errors.ts`)
+- [ ] Middleware global Next.js pour protéger les routes (actuellement garde par page via `session.ts`)
+- [ ] Page `error.tsx` + gestion d'erreurs centralisée (`src/lib/errors.ts`)
+- [ ] Interface utilisateur pour les notifications (table en BDD, insertions présentes, pas d'UI)
+- [ ] Interface pour les signalements (table `reports` et `reportSchema` présents, pas d'UI)
 
 ---
 
@@ -72,3 +82,4 @@
 | `npm run build` | ✅ passe |
 | Déploiement Vercel | ✅ live |
 | Emails Resend | ✅ opérationnels |
+| Cloudinary | ✅ configuré (vars en prod) |
