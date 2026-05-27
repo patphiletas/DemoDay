@@ -26,4 +26,4 @@ export async function uploadCover(file: File): Promise<string> {
 
 export async function uploadCoverBuffer(buffer: Buffer): Promise<string> {
   return uploadBuffer(buffer);
-}
+ }
