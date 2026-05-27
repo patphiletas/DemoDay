@@ -9,6 +9,22 @@ import { sendManuscriptAcceptedEmail, sendManuscriptRejectedEmail } from "@/lib/
 import { requireAdmin } from "@/lib/session";
 import { slugify } from "@/lib/utils";
 
+export async function editManuscriptContentAction(formData: FormData) {
+  await requireAdmin();
+
+  const manuscriptId = Number(formData.get("manuscriptId"));
+  const content = String(formData.get("content") ?? "").trim();
+
+  if (!content || content.length < 10) return;
+
+  await db
+    .update(manuscripts)
+    .set({ content })
+    .where(eq(manuscripts.id, manuscriptId));
+
+  revalidatePath("/admin");
+}
+
 export async function acceptManuscriptAction(formData: FormData) {
   await requireAdmin();
 
@@ -25,7 +41,7 @@ export async function acceptManuscriptAction(formData: FormData) {
   const coverFile = formData.get("coverFile");
   const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
   let coverImageUrl: string | null = null;
-  if (coverFile instanceof File && coverFile.size > 0) {
+  if (coverFile instanceof File && coverFile.size > 0 && coverFile.type.startsWith("image/")) {
     coverImageUrl = await uploadCover(coverFile);
   } else if (coverUrlInput) {
     coverImageUrl = coverUrlInput;

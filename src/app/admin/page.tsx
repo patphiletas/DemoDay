@@ -7,6 +7,7 @@ import { comments, manuscripts, publications, users } from "@/db/schema";
 import {
   acceptManuscriptAction,
   deleteCommentAction,
+  editManuscriptContentAction,
   rejectManuscriptAction,
   restoreCommentAction,
   togglePublicationVisibilityAction,
@@ -129,13 +130,23 @@ export default async function AdminPage() {
 
                   <details className="mb-4 group">
                     <summary className="cursor-pointer select-none text-xs font-semibold editorial-muted hover:text-[color:var(--accent-dark)]">
-                      Lire le texte
+                      Lire / modifier le texte
                     </summary>
-                    <div className="mt-2 max-h-96 overflow-y-auto rounded-md bg-[color:var(--paper-muted)] px-4 py-3">
-                      <p className="whitespace-pre-wrap font-serif-display text-base leading-7 text-[color:var(--ink)]">
-                        {m.content}
-                      </p>
-                    </div>
+                    <form action={editManuscriptContentAction} className="mt-2 space-y-2">
+                      <input type="hidden" name="manuscriptId" value={m.id} />
+                      <textarea
+                        name="content"
+                        rows={16}
+                        defaultValue={m.content}
+                        className="field resize-y px-3 py-3 font-serif-display text-sm leading-7"
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-md border border-(--line) bg-(--paper) px-3 py-1.5 text-xs font-semibold text-(--ink-soft) hover:text-(--ink)"
+                      >
+                        Sauvegarder les modifications
+                      </button>
+                    </form>
                   </details>
 
                   <div className="grid gap-4 sm:grid-cols-2">

@@ -36,22 +36,50 @@ export async function parseEpub(file: File): Promise<ParsedEpub> {
     const title = epub.metadata.title ?? "";
     const author = epub.metadata.creator ?? "";
 
+    const manifest = epub.manifest as Record<
+      string,
+      { id: string; href: string; mediaType?: string; "media-type"?: string }
+    >;
+
     const chapters: string[] = [];
 
+    async function extractText(id: string): Promise<string> {
+      // Gère le cas où epub2 retourne un tuple [content, mime] ou directement une string
+      const rawResult = await epub.getChapterRawAsync(id);
+      const raw: string = Array.isArray(rawResult) ? rawResult[0] : (rawResult as string);
+      return stripHtml(raw);
+    }
+
+    // Passage 1 : utilise epub.flow (spine ordonné)
     for (const chapter of epub.flow) {
-      if (!chapter.id) continue;
+      const chapterId =
+        chapter.id ??
+        Object.values(manifest).find((item) => item.href === chapter.href)?.id;
+      if (!chapterId) continue;
       try {
-        const [raw] = await epub.getChapterRawAsync(chapter.id);
-        const text = stripHtml(raw);
-        if (text.length < 50) continue;
-
-        const chapterTitle = chapter.title?.trim()
-          ? chapter.title.trim()
-          : `Chapitre ${chapters.length + 1}`;
-
+        const text = await extractText(chapterId);
+        if (text.length < 20) continue;
+        const chapterTitle = chapter.title?.trim() || `Chapitre ${chapters.length + 1}`;
         chapters.push(`## ${chapterTitle}\n\n${text}`);
       } catch {
-        // chapitre illisible, on ignore
+        // chapitre illisible
+      }
+    }
+
+    // Passage 2 (fallback) : si le flow est vide, parcourt le manifest HTML directement
+    if (chapters.length === 0) {
+      const htmlItems = Object.values(manifest).filter((item) => {
+        const mt = item.mediaType ?? item["media-type"] ?? "";
+        return mt.includes("html") || mt.includes("xhtml");
+      });
+      for (const item of htmlItems) {
+        try {
+          const text = await extractText(item.id);
+          if (text.length < 20) continue;
+          chapters.push(`## Chapitre ${chapters.length + 1}\n\n${text}`);
+        } catch {
+          // skip
+        }
       }
     }
 
@@ -60,7 +88,6 @@ export async function parseEpub(file: File): Promise<ParsedEpub> {
     // Tentative d'extraction de la couverture
     let coverBuffer: Buffer | undefined;
     try {
-      const manifest = epub.manifest as Record<string, { id: string; href: string; mediaType?: string; "media-type"?: string }>;
       const coverId =
         (epub.metadata as Record<string, unknown>).cover as string | undefined ??
         Object.values(manifest).find(

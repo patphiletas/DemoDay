@@ -56,7 +56,7 @@ export default function ManuscriptSubmissionForm() {
   }
 
   return (
-    <form action={formAction} encType="multipart/form-data" className="space-y-6">
+    <form action={formAction} className="space-y-6">
       {state?.error && (
         <div className="rounded-md border border-red-200 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-700">{state.error}</p>

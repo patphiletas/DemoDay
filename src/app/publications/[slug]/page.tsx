@@ -12,6 +12,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { comments, publications, ratings, users } from "@/db/schema";
 import { parseChapters } from "@/lib/utils";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const publicationAuthors = alias(users, "publication_authors");
 const commentAuthors = alias(users, "comment_authors");
@@ -248,6 +249,24 @@ export default async function PublicationPage({
           </article>
 
           <aside id="avis" className="order-1 space-y-6 lg:sticky lg:top-24 lg:order-2">
+            {chapters.length > 0 && (
+              <section className="editorial-surface space-y-3 rounded-lg p-5">
+                <p className="editorial-label">Chapitres</p>
+                <ol className="max-h-56 space-y-1 overflow-y-auto pr-1">
+                  {chapters.map((ch, i) => (
+                    <li key={i}>
+                      <a
+                        href={`#ch-${i}`}
+                        className="block text-sm text-(--ink-soft) hover:text-(--ink) hover:underline"
+                      >
+                        {ch.title}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
             <section className="editorial-surface space-y-4 rounded-lg p-5">
               <div>
                 <p className="editorial-label">Avis</p>
@@ -346,6 +365,7 @@ export default async function PublicationPage({
         </div>
 
       </div>
+      <ScrollToTop />
     </div>
   );
 }
