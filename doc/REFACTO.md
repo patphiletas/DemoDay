@@ -112,6 +112,36 @@ Si une seule publication existe, `lastPub` et `firstPub` sont `null` (filtre `ne
 
 ---
 
+## 7. Textarea contrôlé dans `ManuscriptSubmissionForm`
+
+**Fichier :** `src/components/ManuscriptSubmissionForm.tsx`
+
+**Problème :** Le contenu EPUB était injecté via `ref.current.value` (mutation DOM impérative). Le navigateur ne reconnaissait pas la valeur comme saisie par l'utilisateur, ce qui faisait échouer la validation native `required` / `minLength` à la soumission — le formulaire bloquait même avec du contenu.
+
+**Solution :** Le champ "Texte" est passé en composant contrôlé (`value={contentValue}` + `onChange`). L'import EPUB appelle `setContentValue(data.content)`, React met à jour l'état, la validation fonctionne normalement.
+
+---
+
+## 8. Config Cloudinary paresseuse
+
+**Fichier :** `src/lib/cloudinary.ts`
+
+**Problème :** `cloudinary.config()` était appelé à l'initialisation du module. Si Next.js chargeait le module avant que les variables d'environnement soient disponibles (cas possible avec le cache de modules des Server Actions), la config restait avec `api_key: undefined` et chaque upload échouait avec `"Must supply api_key"`.
+
+**Solution :** `cloudinary.config()` est déplacé à l'intérieur de `uploadBuffer()`. La config est relue depuis `process.env` à chaque appel, garantissant des valeurs à jour.
+
+---
+
+## 9. Validation du type de fichier côté serveur
+
+**Fichier :** `src/lib/actions/admin.ts`
+
+**Problème :** L'input `accept="image/*"` n'est qu'une suggestion navigateur — un drag-and-drop ou une manipulation manuelle peut contourner le filtre. Sans vérification serveur, n'importe quel fichier (EPUB, PDF…) pouvait être envoyé à Cloudinary, provoquant une erreur d'upload.
+
+**Solution :** Ajout d'une vérification `coverFile.type.startsWith("image/")` dans la Server Action avant d'appeler `uploadCover`. Un fichier non-image tombe silencieusement sur le fallback URL/couverture du manuscrit.
+
+---
+
 ## Résumé des fichiers impactés
 
 | Fichier | Nature du changement |
@@ -123,4 +153,9 @@ Si une seule publication existe, `lastPub` et `firstPub` sont `null` (filtre `ne
 | `src/db/schema.ts` | `uniqueIndex` sur `ratings(publicationId, userId)` |
 | `src/components/SessionPanel.tsx` | Supprimé |
 | `src/app/page.tsx` | Import `SessionPanel` retiré |
-| `src/app/publications/[slug]/page.tsx` | Navigation corrigée + défilement infini |
+| `src/app/publications/[slug]/page.tsx` | Navigation corrigée + défilement infini + index chapitres |
+| `src/components/ManuscriptSubmissionForm.tsx` | Textarea contrôlé, import EPUB |
+| `src/components/ScrollToTop.tsx` | Créé — bouton retour en haut |
+| `src/lib/epub.ts` | Créé — parsing EPUB, extraction couverture, fallback manifest |
+| `src/lib/cloudinary.ts` | Config lazy, `uploadCoverBuffer` |
+| `src/lib/actions/admin.ts` | Validation type image, `editManuscriptContentAction` |

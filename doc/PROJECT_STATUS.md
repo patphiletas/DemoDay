@@ -20,12 +20,15 @@
 - [x] Page de soumission (`/manuscripts/submit`)
 - [x] Formulaire + validation Zod (titre, contenu, catégorie)
 - [x] Server Action `submitManuscriptAction`
+- [x] Import EPUB : extraction automatique titre, auteur, chapitres (`##`), couverture Cloudinary
+- [x] Proposition de couverture par l'auteur à la soumission
 - [x] Dashboard perso : manuscrits soumis, statuts, publications acceptées
 
 ### Dashboard admin
 - [x] Accès restreint par rôle (`role === "admin"`)
 - [x] Acceptation de manuscrit → création publication (transaction DB) + notification + email
 - [x] Upload d'image de couverture via Cloudinary ou URL externe à l'acceptation
+- [x] Édition du texte du manuscrit avant publication (`editManuscriptContentAction`)
 - [x] Rejet de manuscrit → raison + notification + email
 - [x] Dépublication / toggle visibilité
 - [x] Modération des commentaires (soft delete, restore)
@@ -35,6 +38,8 @@
 - [x] Barre de recherche full-text (ILIKE) sur titre, pitch, catégorie, auteur — URL partageable `?q=`
 - [x] Route dynamique `/publications/[slug]`
 - [x] Navigation précédent / suivant avec défilement infini (wrap)
+- [x] Affichage structuré par chapitres avec index sticky dans la barre latérale
+- [x] Bouton retour en haut de page (`ScrollToTop`)
 - [x] Système de notation 1–5 étoiles (upsert via `onConflictDoUpdate`)
 - [x] Commentaires avec modération
 - [x] Rate limiting sur commentaires (10 / min par utilisateur)
@@ -54,8 +59,9 @@
 
 ### Architecture
 - [x] Gardes d'auth partagés (`src/lib/session.ts` — `requireSession`, `requireAdmin`)
-- [x] Utilitaires extraits (`src/lib/utils.ts` — `slugify`)
-- [x] Upload Cloudinary encapsulé (`src/lib/cloudinary.ts`)
+- [x] Utilitaires extraits (`src/lib/utils.ts` — `slugify`, `parseChapters`)
+- [x] Upload Cloudinary encapsulé (`src/lib/cloudinary.ts` — config lazy, validation type image)
+- [x] Parser EPUB serveur (`src/lib/epub.ts` — `epub2`, fallback manifest, extraction couverture)
 
 ### Tests & CI/CD
 - [x] Vitest configuré

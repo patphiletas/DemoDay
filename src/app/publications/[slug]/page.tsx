@@ -200,7 +200,7 @@ export default async function PublicationPage({
                 Lire
               </a>
               {chapters.length > 0 && (
-                <a href="#sommaire" className="btn-secondary min-h-0 px-3 py-2">
+                <a href="#chapitres" className="btn-secondary min-h-0 px-3 py-2">
                   {chapters.length} chapitre{chapters.length > 1 ? "s" : ""}
                 </a>
               )}
@@ -215,21 +215,6 @@ export default async function PublicationPage({
           <article id="texte" className="order-2 lg:order-1">
             {chapters.length > 0 ? (
               <div className="space-y-12">
-                <nav id="sommaire" className="rounded-lg border border-(--line) bg-(--paper-muted) p-5 space-y-2">
-                  <p className="editorial-label">Sommaire</p>
-                  <ol className="space-y-1">
-                    {chapters.map((ch, i) => (
-                      <li key={i}>
-                        <a
-                          href={`#ch-${i}`}
-                          className="text-sm text-(--ink-soft) hover:text-(--accent-dark) hover:underline"
-                        >
-                          {ch.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ol>
-                </nav>
                 {chapters.map((ch, i) => (
                   <section key={i} id={`ch-${i}`} className="scroll-mt-24 space-y-4">
                     <h2 className="font-serif-display text-2xl font-bold text-(--ink) border-b pb-3 rule">
@@ -250,7 +235,7 @@ export default async function PublicationPage({
 
           <aside id="avis" className="order-1 space-y-6 lg:sticky lg:top-24 lg:order-2">
             {chapters.length > 0 && (
-              <section className="editorial-surface space-y-3 rounded-lg p-5">
+              <section id="chapitres" className="editorial-surface space-y-3 rounded-lg p-5">
                 <p className="editorial-label">Chapitres</p>
                 <ol className="max-h-56 space-y-1 overflow-y-auto pr-1">
                   {chapters.map((ch, i) => (

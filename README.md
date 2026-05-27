@@ -35,8 +35,10 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 | 🏠 Homepage | Carousel horizontal des publications, notation et commentaires en session |
 | 🔍 Recherche | Barre de recherche full-text (ILIKE) sur titre, pitch, catégorie, auteur — URL partageable (`?q=`) |
 | 📖 Page de lecture | Route dynamique `/publications/[slug]`, navigation précédent/suivant avec défilement infini |
-| 🖼️ Couvertures | Upload d'image via Cloudinary ou URL externe, saisi lors de l'acceptation du manuscrit |
-| 🛡️ Dashboard admin | Gestion des manuscrits en attente, modération des commentaires, visibilité des publications |
+| 🖼️ Couvertures | Upload d'image via Cloudinary ou URL externe, proposée à la soumission et confirmée à l'acceptation |
+| 📥 Import EPUB | Extraction automatique du titre, de l'auteur, des chapitres (`##`) et de la couverture depuis un fichier `.epub` |
+| 📖 Chapitres | Affichage structuré avec index sticky dans la barre latérale, bouton retour en haut de page |
+| 🛡️ Dashboard admin | Gestion des manuscrits en attente, édition du texte avant publication, modération des commentaires, visibilité |
 | 👤 Dashboard perso | Manuscrits soumis, livres notés 5★, publications acceptées |
 | 📧 Emails transactionnels | Resend — confirmation d'inscription, notification d'acceptation/refus de manuscrit |
 | 🌙 Mode sombre | Basculement manuel + respect de `prefers-color-scheme`, sans flash au chargement |
@@ -85,9 +87,10 @@ demoday/
 │       ├── cloudinary.ts    # upload d'images vers Cloudinary
 │       ├── db.ts            # client Drizzle
 │       ├── email.ts         # emails transactionnels Resend
+│       ├── epub.ts          # parsing EPUB (chapitres, couverture) via epub2
 │       ├── rate-limit.ts    # rate limiting in-memory
 │       ├── session.ts       # gardes d'auth partagés (requireSession, requireAdmin)
-│       ├── utils.ts         # utilitaires (slugify)
+│       ├── utils.ts         # utilitaires (slugify, parseChapters)
 │       └── validation.ts    # schemas Zod + types inférés
 ├── .github/
 │   └── workflows/
@@ -192,8 +195,9 @@ Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exé
 | 5 | Tests unitaires | Vitest — validation schemas |
 | 6 | CI/CD | GitHub Actions + Vercel |
 | 7 | Mode sombre | `ThemeToggle` + `prefers-color-scheme` + Tailwind `dark:` |
-| 8 | Upload d'images | Cloudinary v2 depuis une Server Action |
+| 8 | Upload d'images | Cloudinary v2 depuis Server Action et route API |
 | 9 | Recherche serveur | `searchParams` + `ilike` Drizzle, URL partageable |
+| 10 | Parsing de fichiers | Import EPUB côté serveur — extraction titre, auteur, chapitres, couverture |
 | + | Emails transactionnels | Resend — bienvenue, acceptation, refus manuscrit |
 
 ---
