@@ -6,9 +6,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function uploadCover(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-
+function uploadBuffer(buffer: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
@@ -20,4 +18,12 @@ export async function uploadCover(file: File): Promise<string> {
       )
       .end(buffer);
   });
+}
+
+export async function uploadCover(file: File): Promise<string> {
+  return uploadBuffer(Buffer.from(await file.arrayBuffer()));
+}
+
+export async function uploadCoverBuffer(buffer: Buffer): Promise<string> {
+  return uploadBuffer(buffer);
 }

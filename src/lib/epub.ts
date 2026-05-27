@@ -7,6 +7,7 @@ export type ParsedEpub = {
   title: string;
   author: string;
   content: string;
+  coverBuffer?: Buffer;
 };
 
 function stripHtml(html: string): string {
@@ -55,7 +56,28 @@ export async function parseEpub(file: File): Promise<ParsedEpub> {
     }
 
     const content = chapters.join("\n\n");
-    return { title, author, content };
+
+    // Tentative d'extraction de la couverture
+    let coverBuffer: Buffer | undefined;
+    try {
+      const manifest = epub.manifest as Record<string, { id: string; href: string; mediaType?: string; "media-type"?: string }>;
+      const coverId =
+        (epub.metadata as Record<string, unknown>).cover as string | undefined ??
+        Object.values(manifest).find(
+          (item) =>
+            (item.mediaType ?? item["media-type"] ?? "").startsWith("image/") &&
+            (item.id?.toLowerCase().includes("cover") || item.href?.toLowerCase().includes("cover"))
+        )?.id;
+
+      if (coverId) {
+        const [imgBuffer] = await epub.getImageAsync(coverId);
+        coverBuffer = Buffer.from(imgBuffer as Buffer);
+      }
+    } catch {
+      // couverture non disponible
+    }
+
+    return { title, author, content, coverBuffer };
   } finally {
     await unlink(tmpPath).catch(() => null);
   }

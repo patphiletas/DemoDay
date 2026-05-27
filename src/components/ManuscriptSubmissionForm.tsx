@@ -17,10 +17,12 @@ export default function ManuscriptSubmissionForm() {
   const [state, formAction, isPending] = useActionState(submitManuscriptAction, null);
   const [epubLoading, setEpubLoading] = useState(false);
   const [epubError, setEpubError] = useState<string | null>(null);
+  const [contentValue, setContentValue] = useState("");
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   const titleRef = useRef<HTMLInputElement>(null);
   const authorRef = useRef<HTMLInputElement>(null);
-  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const coverUrlRef = useRef<HTMLInputElement>(null);
 
   async function handleEpubChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -43,7 +45,9 @@ export default function ManuscriptSubmissionForm() {
 
       if (titleRef.current && data.title) titleRef.current.value = data.title;
       if (authorRef.current && data.author) authorRef.current.value = data.author;
-      if (contentRef.current && data.content) contentRef.current.value = data.content;
+      if (data.content) setContentValue(data.content);
+      if (coverUrlRef.current && data.coverImageUrl) coverUrlRef.current.value = data.coverImageUrl;
+      if (data.coverImageUrl) setCoverPreview(data.coverImageUrl);
     } catch {
       setEpubError("Impossible de contacter le serveur.");
     } finally {
@@ -144,12 +148,13 @@ export default function ManuscriptSubmissionForm() {
           Pour structurer en chapitres, commence chaque titre par <code>##</code> (ex : <code>## Chapitre 1</code>).
         </p>
         <textarea
-          ref={contentRef}
           id="content"
           name="content"
           required
           minLength={100}
           rows={18}
+          value={contentValue}
+          onChange={(e) => setContentValue(e.target.value)}
           className="field mt-2 resize-y px-3 py-3 font-serif-display text-base leading-7"
           placeholder="Collez ou rédigez votre manuscrit ici."
         />
@@ -167,11 +172,20 @@ export default function ManuscriptSubmissionForm() {
             className="w-full cursor-pointer rounded-md border border-(--line) bg-(--paper) px-3 py-1.5 text-xs text-(--ink-soft) file:mr-3 file:rounded file:border-0 file:bg-(--paper-muted) file:px-2 file:py-1 file:text-xs file:font-semibold file:text-(--ink)"
           />
           <input
+            ref={coverUrlRef}
             type="url"
             name="coverImageUrl"
             placeholder="ou coller une URL d'image"
             className="field px-3 py-2 text-sm"
+            onChange={(e) => setCoverPreview(e.target.value || null)}
           />
+          {coverPreview && (
+            <img
+              src={coverPreview}
+              alt="Prévisualisation couverture"
+              className="h-32 rounded border border-(--line) object-contain"
+            />
+          )}
           <p className="text-xs editorial-muted">
             L'image sera soumise à validation éditoriale. Le fichier a priorité sur l'URL.
           </p>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseEpub } from "@/lib/epub";
+import { uploadCoverBuffer } from "@/lib/cloudinary";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -14,8 +15,14 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const result = await parseEpub(file);
-    return NextResponse.json(result);
+    const { coverBuffer, ...result } = await parseEpub(file);
+
+    let coverImageUrl: string | undefined;
+    if (coverBuffer) {
+      coverImageUrl = await uploadCoverBuffer(coverBuffer).catch(() => undefined);
+    }
+
+    return NextResponse.json({ ...result, coverImageUrl });
   } catch {
     return NextResponse.json({ error: "Impossible de lire ce fichier EPUB." }, { status: 422 });
   }
