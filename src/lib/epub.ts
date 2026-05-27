@@ -15,12 +15,26 @@ function stripHtml(html: string): string {
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n\n")
     .replace(/<[^>]+>/g, "")
+    // entités nommées courantes
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&laquo;/g, "«")
+    .replace(/&raquo;/g, "»")
+    .replace(/&rsquo;/g, "’")
+    .replace(/&lsquo;/g, "‘")
+    .replace(/&hellip;/g, "…")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–")
+    // entités numériques décimales (ex : &#160; &#8217;)
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    // entités numériques hexadécimales (ex : &#x00A0; &#x27;)
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    // normalise les espaces insécables résiduels en espaces normaux
+    .replace(/ /g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
