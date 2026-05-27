@@ -47,8 +47,7 @@ export default async function Home({
     .from(publications)
     .innerJoin(publicationAuthors, eq(publications.authorId, publicationAuthors.id))
     .where(searchFilter ? and(eq(publications.isVisible, true), searchFilter) : eq(publications.isVisible, true))
-    .orderBy(desc(publications.publishedAt))
-    .limit(q ? 50 : 6);
+    .orderBy(desc(publications.publishedAt));
 
   const publicationIds = featuredPublications.map((p) => p.id);
 
