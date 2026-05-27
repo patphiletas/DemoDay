@@ -134,6 +134,12 @@ export default async function AdminPage() {
                     </summary>
                     <form action={editManuscriptContentAction} className="mt-2 space-y-2">
                       <input type="hidden" name="manuscriptId" value={m.id} />
+                      <input
+                        type="text"
+                        name="title"
+                        defaultValue={m.title}
+                        className="field px-3 py-2 text-sm font-semibold"
+                      />
                       <textarea
                         name="content"
                         rows={16}

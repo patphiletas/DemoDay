@@ -13,13 +13,14 @@ export async function editManuscriptContentAction(formData: FormData) {
   await requireAdmin();
 
   const manuscriptId = Number(formData.get("manuscriptId"));
+  const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
 
   if (!content || content.length < 10) return;
 
   await db
     .update(manuscripts)
-    .set({ content })
+    .set({ ...(title && { title }), content })
     .where(eq(manuscripts.id, manuscriptId));
 
   revalidatePath("/admin");
