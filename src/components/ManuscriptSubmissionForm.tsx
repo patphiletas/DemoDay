@@ -19,7 +19,7 @@ export default function ManuscriptSubmissionForm() {
   );
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} encType="multipart/form-data" className="space-y-6">
       {state?.error && (
         <div className="rounded-md border border-red-200 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-700">{state.error}</p>
@@ -110,6 +110,29 @@ export default function ManuscriptSubmissionForm() {
           className="field mt-2 resize-y px-3 py-3 font-serif-display text-base leading-7"
           placeholder="Collez ou rédigez votre manuscrit ici."
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-(--ink)">
+          Image de couverture <span className="font-normal editorial-muted">(optionnel)</span>
+        </label>
+        <div className="mt-2 space-y-2">
+          <input
+            type="file"
+            name="coverFile"
+            accept="image/*"
+            className="w-full cursor-pointer rounded-md border border-(--line) bg-(--paper) px-3 py-1.5 text-xs text-(--ink-soft) file:mr-3 file:rounded file:border-0 file:bg-(--paper-muted) file:px-2 file:py-1 file:text-xs file:font-semibold file:text-(--ink)"
+          />
+          <input
+            type="url"
+            name="coverImageUrl"
+            placeholder="ou coller une URL d'image"
+            className="field px-3 py-2 text-sm"
+          />
+          <p className="text-xs editorial-muted">
+            L'image sera soumise à validation éditoriale. Le fichier a priorité sur l'URL.
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center justify-end gap-3 border-t pt-5 rule">

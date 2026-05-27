@@ -16,6 +16,12 @@ export async function acceptManuscriptAction(formData: FormData) {
   const editorNote = String(formData.get("editorNote") ?? "").trim();
   const pitch = String(formData.get("pitch") ?? "").trim();
 
+  const manuscript = await db.query.manuscripts.findFirst({
+    where: eq(manuscripts.id, manuscriptId),
+  });
+
+  if (!manuscript) return;
+
   const coverFile = formData.get("coverFile");
   const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
   let coverImageUrl: string | null = null;
@@ -23,13 +29,10 @@ export async function acceptManuscriptAction(formData: FormData) {
     coverImageUrl = await uploadCover(coverFile);
   } else if (coverUrlInput) {
     coverImageUrl = coverUrlInput;
+  } else {
+    // fallback : image proposée par l'auteur à la soumission
+    coverImageUrl = manuscript.coverImageUrl ?? null;
   }
-
-  const manuscript = await db.query.manuscripts.findFirst({
-    where: eq(manuscripts.id, manuscriptId),
-  });
-
-  if (!manuscript) return;
 
   const author = await db.query.users.findFirst({
     where: eq(users.id, manuscript.authorId),

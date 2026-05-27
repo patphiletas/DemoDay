@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { manuscripts } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { uploadCover } from "@/lib/cloudinary";
 import { db } from "@/lib/db";
 import { interactionRateLimit } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/session";
 import { manuscriptSchema } from "@/lib/validation";
 
 export type ManuscriptSubmissionState = { error: string } | null;
@@ -15,15 +15,9 @@ export async function submitManuscriptAction(
   _prevState: ManuscriptSubmissionState,
   formData: FormData
 ): Promise<ManuscriptSubmissionState> {
-  const session = await auth.api
-    .getSession({ headers: await headers() })
-    .catch(() => null);
+  const userId = await requireSession();
 
-  if (!session) {
-    redirect("/signin");
-  }
-
-  if (!interactionRateLimit("manuscript", session.user.id)) {
+  if (!interactionRateLimit("manuscript", userId)) {
     return { error: "Trop de soumissions. Réessaie dans une minute." };
   }
 
@@ -38,11 +32,25 @@ export async function submitManuscriptAction(
     return { error: result.error.issues[0].message };
   }
 
+  const coverFile = formData.get("coverFile");
+  const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
+  let coverImageUrl: string | null = null;
+  if (coverFile instanceof File && coverFile.size > 0) {
+    try {
+      coverImageUrl = await uploadCover(coverFile);
+    } catch {
+      return { error: "L'upload de l'image a échoué. Réessaie ou colle une URL." };
+    }
+  } else if (coverUrlInput) {
+    coverImageUrl = coverUrlInput;
+  }
+
   await db.insert(manuscripts).values({
-    authorId: session.user.id,
+    authorId: userId,
     category: result.data.category,
     content: result.data.content,
     creditedAuthorName: result.data.creditedAuthorName,
+    coverImageUrl,
     status: "submitted",
     title: result.data.title,
   });

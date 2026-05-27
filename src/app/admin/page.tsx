@@ -39,6 +39,7 @@ export default async function AdminPage() {
         category: manuscripts.category,
         creditedAuthorName: manuscripts.creditedAuthorName,
         content: manuscripts.content,
+        coverImageUrl: manuscripts.coverImageUrl,
         status: manuscripts.status,
         submittedAt: manuscripts.submittedAt,
         submitterName: manuscriptAuthors.name,
@@ -156,6 +157,19 @@ export default async function AdminPage() {
                       />
                       <div className="space-y-1">
                         <p className="text-xs font-semibold editorial-muted">Image de couverture</p>
+                        {m.coverImageUrl && (
+                          <div className="flex items-center gap-3 rounded-md bg-(--paper-muted) p-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={m.coverImageUrl}
+                              alt="Couverture proposée"
+                              className="h-16 w-12 rounded object-cover"
+                            />
+                            <p className="text-xs editorial-muted">
+                              Image proposée par l'auteur — conservée si aucune autre n'est fournie.
+                            </p>
+                          </div>
+                        )}
                         <input
                           type="file"
                           name="coverFile"
@@ -165,6 +179,7 @@ export default async function AdminPage() {
                         <input
                           type="url"
                           name="coverImageUrl"
+                          defaultValue={m.coverImageUrl ?? ""}
                           placeholder="ou coller une URL d'image"
                           className="field px-3 py-2 text-sm"
                         />
