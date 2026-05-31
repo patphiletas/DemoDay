@@ -78,20 +78,27 @@ CLOUDINARY_API_SECRET=your_api_secret
 - [x] Better Auth (signup / signin / signout)
 - [x] Homepage, pages auth, soumission, admin, dashboard perso
 - [x] Barre de recherche (ILIKE, URL partageable)
-- [x] Acceptance/rejet + publications publiques
-- [x] Upload couverture via Cloudinary ou URL externe
+- [x] Acceptance/rejet/suppression + publications publiques
+- [x] Édition manuscrit (titre, auteur crédité, texte) avant publication
+- [x] Upload couverture via Cloudinary ou URL externe (soumission + admin)
+- [x] Pitch et couverture préservés lors d'une dépublication
 - [x] Navigation précédent/suivant avec défilement infini
+- [x] Affichage par chapitres + index sticky + lightbox couverture
+- [x] Contrôle de zoom du texte principal (A− / A+)
 - [x] Commentaires, notation (upsert), rate limiting
 - [x] Emails transactionnels (Resend)
 - [x] Notifications in-app
 - [x] Mode sombre
+- [x] Responsive mobile renforcé (lecture, admin, navbar, carousel)
+- [x] Gestion d'erreurs (`src/lib/errors.ts` + `src/app/error.tsx`)
+- [x] Import EPUB (titre, auteur, chapitres, couverture, décodage entités HTML)
 - [x] Tests Vitest + GitHub Actions CI
 - [x] Déployé sur Vercel
 
 ## Reste à faire
 - [ ] Middleware global Next.js pour protéger les routes
-- [ ] Gestion d'erreurs centralisée (`errors.ts` + `error.tsx`)
 - [ ] Interface utilisateur pour les notifications
+- [ ] Interface pour les signalements (`reports`)
 
 ---
 

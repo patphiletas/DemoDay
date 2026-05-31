@@ -8,23 +8,32 @@ export function SearchBar() {
   const searchParams = useSearchParams();
   const [value, setValue] = useState(searchParams.get("q") ?? "");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentQuery = searchParams.get("q") ?? "";
+  const searchParamsString = searchParams.toString();
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    const nextQuery = value.trim();
+    if (nextQuery === currentQuery) {
+      return;
+    }
+
     debounceRef.current = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value.trim()) {
-        params.set("q", value.trim());
+      const params = new URLSearchParams(searchParamsString);
+      if (nextQuery) {
+        params.set("q", nextQuery);
       } else {
         params.delete("q");
       }
-      router.replace(`/?${params.toString()}`);
+      const queryString = params.toString();
+      router.replace(queryString ? `/?${queryString}` : "/");
     }, 300);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [value]);
+  }, [currentQuery, router, searchParamsString, value]);
 
   return (
     <div className="relative w-full max-w-md">

@@ -4,20 +4,21 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { authRateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { actionError, type ActionState, validationActionError } from "@/lib/errors";
 import { signupSchema, signinSchema } from "@/lib/validation";
 
-export type AuthState = { error: string } | null;
+export type AuthState = ActionState;
 
 export async function signupAction(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
   if (!(await authRateLimit("signup"))) {
-    return { error: "Trop de tentatives. Réessaie dans 15 minutes." };
+    return actionError("Trop de tentatives. Réessaie dans 15 minutes.");
   }
 
   if (formData.get("password") !== formData.get("confirmPassword")) {
-    return { error: "Les mots de passe ne correspondent pas." };
+    return actionError("Les mots de passe ne correspondent pas.");
   }
 
   const result = signupSchema.safeParse({
@@ -27,7 +28,7 @@ export async function signupAction(
   });
 
   if (!result.success) {
-    return { error: result.error.issues[0].message };
+    return validationActionError(result.error);
   }
 
   try {
@@ -39,7 +40,7 @@ export async function signupAction(
       },
     });
   } catch {
-    return { error: "Une erreur est survenue, réessaie." };
+    return actionError("Une erreur est survenue, réessaie.");
   }
 
   // Email envoyé en best-effort : une erreur ne bloque pas l'inscription
@@ -53,7 +54,7 @@ export async function signinAction(
   formData: FormData
 ): Promise<AuthState> {
   if (!(await authRateLimit("signin"))) {
-    return { error: "Trop de tentatives. Réessaie dans 15 minutes." };
+    return actionError("Trop de tentatives. Réessaie dans 15 minutes.");
   }
 
   const result = signinSchema.safeParse({
@@ -62,7 +63,7 @@ export async function signinAction(
   });
 
   if (!result.success) {
-    return { error: result.error.issues[0].message };
+    return validationActionError(result.error);
   }
 
   try {
@@ -73,7 +74,7 @@ export async function signinAction(
       },
     });
   } catch {
-    return { error: "Email ou mot de passe incorrect." };
+    return actionError("Email ou mot de passe incorrect.");
   }
 
   redirect("/");

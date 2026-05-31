@@ -72,7 +72,7 @@ body::before {
   min-height: 100vh;
   background: var(--background);
   color: var(--ink);
-  padding: 2.5rem 1.5rem;
+  padding: 1.25rem 1rem;
 }
 
 .container-editorial {
@@ -184,8 +184,14 @@ body::before {
   border-color: var(--line);
 }
 
+.reading-body {
+  font-size: var(--reading-text-size, 1.125rem);
+  line-height: var(--reading-line-height, 1.9);
+  overflow-wrap: break-word;
+}
+
 .publication-card {
-  width: 230px;
+  width: min(78vw, 230px);
   flex-shrink: 0;
 }
 
@@ -211,6 +217,10 @@ body::before {
 }
 
 @media (min-width: 640px) {
+  .page-shell {
+    padding: 2.5rem 1.5rem;
+  }
+
   .publication-card {
     width: 280px;
   }

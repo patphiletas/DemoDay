@@ -10,31 +10,32 @@ export default async function Navbar() {
     .catch(() => null);
 
   return (
-    <nav className="sticky top-0 z-20 w-full border-b bg-[color:var(--paper)] px-6 py-3 backdrop-blur-md rule">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-        <Link href="/" className="font-serif-display text-xl font-bold text-[color:var(--ink)]">
+    <nav className="sticky top-0 z-20 w-full border-b bg-(--paper) px-3 py-2 backdrop-blur-md rule sm:px-6 sm:py-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+        <Link href="/" className="font-serif-display text-lg font-bold text-(--ink) sm:text-xl">
           AlterNative
         </Link>
 
-        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
           <ThemeToggle />
           {session ? (
             <>
               <Link
                 href="/dashboard"
-                className="text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--accent-dark)]"
+                className="text-sm font-medium text-(--ink-soft) transition-colors hover:text-(--accent-dark)"
               >
                 Mon espace
               </Link>
-              <span className="hidden text-sm font-semibold text-[color:var(--ink)] sm:inline">
+              <span className="hidden max-w-36 truncate text-sm font-semibold text-(--ink) md:inline">
                 {session.user.name}
               </span>
               <form action={signoutAction}>
                 <button
                   type="submit"
-                  className="text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--accent)]"
+                  className="text-sm font-medium text-(--ink-soft) transition-colors hover:text-(--accent)"
                 >
-                  Déconnexion
+                  <span className="sm:hidden">Sortir</span>
+                  <span className="hidden sm:inline">Déconnexion</span>
                 </button>
               </form>
             </>
@@ -42,7 +43,7 @@ export default async function Navbar() {
             <>
               <Link
                 href="/signin"
-                className="text-sm font-medium text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--accent-dark)]"
+                className="text-sm font-medium text-(--ink-soft) transition-colors hover:text-(--accent-dark)"
               >
                 Connexion
               </Link>

@@ -41,6 +41,7 @@
 - [x] Route dynamique `/publications/[slug]`
 - [x] Navigation précédent / suivant avec défilement infini (wrap)
 - [x] Affichage structuré par chapitres avec index sticky dans la barre latérale
+- [x] Contrôle A− / A+ pour ajuster la taille du texte principal
 - [x] Vue zoomée de la couverture (lightbox, fermeture Échap / clic extérieur)
 - [x] Bouton retour en haut de page (`ScrollToTop`)
 - [x] Système de notation 1–5 étoiles (upsert via `onConflictDoUpdate`)
@@ -59,9 +60,11 @@
 ### UX & accessibilité
 - [x] Mode sombre (ThemeToggle + `prefers-color-scheme` + Tailwind `dark:`)
 - [x] Pas de flash au chargement
+- [x] Responsive mobile renforcé (navbar compacte, admin en cartes, lecture mobile, carousel swipe)
 
 ### Architecture
 - [x] Gardes d'auth partagés (`src/lib/session.ts` — `requireSession`, `requireAdmin`)
+- [x] Helpers d'erreurs pour Server Actions (`src/lib/errors.ts`) + page `error.tsx`
 - [x] Utilitaires extraits (`src/lib/utils.ts` — `slugify`, `parseChapters`)
 - [x] Upload Cloudinary encapsulé (`src/lib/cloudinary.ts` — config lazy, validation type image)
 - [x] Parser EPUB serveur (`src/lib/epub.ts` — `epub2`, fallback manifest, extraction couverture)
@@ -69,8 +72,8 @@
 
 ### Tests & CI/CD
 - [x] Vitest configuré
-- [x] Tests de validation Zod
-- [x] GitHub Actions (lint + tests sur chaque push)
+- [x] Tests de validation Zod + helpers d'erreurs
+- [x] GitHub Actions (tests sur chaque push)
 - [x] Déploiement Vercel : https://demo-day-wine.vercel.app/
 
 ---
@@ -78,7 +81,6 @@
 ## ❌ Non implémenté
 
 - [ ] Middleware global Next.js pour protéger les routes (actuellement garde par page via `session.ts`)
-- [ ] Page `error.tsx` + gestion d'erreurs centralisée (`src/lib/errors.ts`)
 - [ ] Interface utilisateur pour les notifications (table en BDD, insertions présentes, pas d'UI)
 - [ ] Interface pour les signalements (table `reports` et `reportSchema` présents, pas d'UI)
 

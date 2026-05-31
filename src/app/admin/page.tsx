@@ -1,9 +1,7 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { comments, manuscripts, publications, users } from "@/db/schema";
+import { requireAdmin } from "@/lib/session";
 import {
   acceptManuscriptAction,
   deleteCommentAction,
@@ -22,17 +20,11 @@ const publicationAuthors = alias(users, "publication_authors");
 const commentAuthors = alias(users, "comment_authors");
 
 export default async function AdminPage() {
-  const session = await auth.api
-    .getSession({ headers: await headers() })
-    .catch(() => null);
-
-  if (!session) redirect("/signin");
+  const userId = await requireAdmin();
 
   const currentUser = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
+    where: eq(users.id, userId),
   });
-
-  if (currentUser?.role !== "admin") redirect("/");
 
   const [pendingManuscripts, rejectedManuscripts, allPublications, allComments] = await Promise.all([
     db
@@ -106,11 +98,11 @@ export default async function AdminPage() {
     <div className="page-shell">
       <div className="container-editorial max-w-5xl space-y-12">
         <div>
-          <h1 className="font-serif-display text-5xl font-bold text-(--ink)">
+          <h1 className="font-serif-display text-4xl font-bold text-(--ink) sm:text-5xl">
             Administration
           </h1>
           <p className="mt-2 text-sm editorial-muted">
-            Bienvenue, {session.user.name}
+            Bienvenue, {currentUser?.name}
           </p>
         </div>
 
@@ -136,10 +128,10 @@ export default async function AdminPage() {
                 >
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div>
-                      <p className="font-serif-display text-xl font-bold text-(--ink)">
+                      <p className="font-serif-display text-lg font-bold text-(--ink) sm:text-xl">
                         {m.title}
                       </p>
-                      <p className="text-xs editorial-muted">
+                      <p className="mt-1 text-xs leading-5 editorial-muted">
                         Œuvre de {m.creditedAuthorName} · Déposé par {m.submitterName} · {m.authorEmail} · {m.category ?? "Sans catégorie"} ·{" "}
                         {new Date(m.submittedAt).toLocaleDateString("fr-FR")}
                       </p>
@@ -209,7 +201,7 @@ export default async function AdminPage() {
                               className="h-16 w-12 rounded object-cover"
                             />
                             <p className="text-xs editorial-muted">
-                              Image proposée par l'auteur — conservée si aucune autre n'est fournie.
+                              Image proposée par l&apos;auteur — conservée si aucune autre n&apos;est fournie.
                             </p>
                           </div>
                         )}
@@ -226,7 +218,7 @@ export default async function AdminPage() {
                           placeholder="ou coller une URL d'image"
                           className="field px-3 py-2 text-sm"
                         />
-                        <p className="text-xs editorial-muted">Le fichier a priorité sur l'URL.</p>
+                        <p className="text-xs editorial-muted">Le fichier a priorité sur l&apos;URL.</p>
                       </div>
                       <button
                         type="submit"
@@ -259,7 +251,7 @@ export default async function AdminPage() {
                     <input type="hidden" name="manuscriptId" value={m.id} />
                     <button
                       type="submit"
-                      className="mt-1 text-xs text-red-400 hover:text-red-600 hover:underline"
+                      className="mt-3 min-h-11 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 sm:min-h-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-xs sm:text-red-400 sm:hover:bg-transparent sm:hover:text-red-600 sm:hover:underline"
                     >
                       Supprimer définitivement
                     </button>
@@ -279,7 +271,86 @@ export default async function AdminPage() {
           {allPublications.length === 0 ? (
             <p className="text-sm editorial-muted">Aucune publication.</p>
           ) : (
-            <div className="editorial-surface overflow-hidden rounded-lg">
+            <>
+            <div className="space-y-3 md:hidden">
+              {allPublications.map((pub) => (
+                <article key={pub.id} className="editorial-surface space-y-4 rounded-lg p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="text-base font-bold leading-tight text-(--ink)">{pub.title}</h3>
+                      <p className="mt-1 text-xs editorial-muted">
+                        {pub.creditedAuthorName} · {pub.category}
+                      </p>
+                      <p className="mt-0.5 text-xs editorial-muted">Déposé par {pub.submitterName}</p>
+                    </div>
+                    {pub.isVisible ? (
+                      <span className="sage-chip shrink-0 rounded-full px-2 py-0.5 text-xs font-bold">
+                        Visible
+                      </span>
+                    ) : (
+                      <span className="muted-chip shrink-0 rounded-full px-2 py-0.5 text-xs font-bold">
+                        Masquée
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <form action={togglePublicationVisibilityAction}>
+                      <input type="hidden" name="publicationId" value={pub.id} />
+                      <input type="hidden" name="isVisible" value={String(pub.isVisible)} />
+                      <button
+                        type="submit"
+                        className="btn-secondary min-h-11 w-full px-3 py-2 text-sm"
+                      >
+                        {pub.isVisible ? "Masquer" : "Afficher"}
+                      </button>
+                    </form>
+                    <form action={unpublishAction}>
+                      <input type="hidden" name="publicationId" value={pub.id} />
+                      <button
+                        type="submit"
+                        className="accent-chip min-h-11 w-full rounded-md border border-(--accent) px-3 py-2 text-sm font-bold"
+                      >
+                        Remettre en manuscrit
+                      </button>
+                    </form>
+                  </div>
+
+                  <details>
+                    <summary className="cursor-pointer select-none text-sm font-semibold editorial-muted hover:text-(--accent-dark)">
+                      {pub.coverImageUrl ? "Modifier la couverture" : "Ajouter une couverture"}
+                    </summary>
+                    <form action={updatePublicationCoverAction} encType="multipart/form-data" className="mt-3 space-y-2">
+                      <input type="hidden" name="publicationId" value={pub.id} />
+                      {pub.coverImageUrl && (
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={pub.coverImageUrl} alt="" className="h-20 rounded object-cover" />
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        name="coverFile"
+                        accept="image/*"
+                        className="w-full cursor-pointer rounded border border-(--line) bg-(--paper) px-2 py-2 text-xs text-(--ink-soft) file:mr-2 file:rounded file:border-0 file:bg-(--paper-muted) file:px-2 file:py-1 file:text-xs file:font-semibold"
+                      />
+                      <input
+                        type="url"
+                        name="coverImageUrl"
+                        defaultValue={pub.coverImageUrl ?? ""}
+                        placeholder="ou URL d'image"
+                        className="field px-3 py-2 text-sm"
+                      />
+                      <button type="submit" className="btn-secondary min-h-11 w-full px-3 py-2 text-sm">
+                        Enregistrer
+                      </button>
+                    </form>
+                  </details>
+                </article>
+              ))}
+            </div>
+
+            <div className="editorial-surface hidden overflow-hidden rounded-lg md:block">
               <table className="w-full text-sm">
                 <thead className="border-b bg-(--paper-muted) rule">
                   <tr>
@@ -341,6 +412,7 @@ export default async function AdminPage() {
                             <form action={updatePublicationCoverAction} encType="multipart/form-data" className="mt-2 space-y-1">
                               <input type="hidden" name="publicationId" value={pub.id} />
                               {pub.coverImageUrl && (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img src={pub.coverImageUrl} alt="" className="h-12 rounded object-cover" />
                               )}
                               <input
@@ -368,6 +440,7 @@ export default async function AdminPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </section>
 
@@ -379,7 +452,7 @@ export default async function AdminPage() {
             </h2>
             <div className="divide-y divide-(--line) rounded-lg border border-(--line)">
               {rejectedManuscripts.map((m) => (
-                <div key={m.id} className="flex items-center justify-between gap-4 px-4 py-3">
+                <div key={m.id} className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-(--ink)">{m.title}</p>
                     <p className="text-xs editorial-muted">
@@ -394,7 +467,7 @@ export default async function AdminPage() {
                     <input type="hidden" name="manuscriptId" value={m.id} />
                     <button
                       type="submit"
-                      className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
+                      className="min-h-11 w-full rounded border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 sm:min-h-0 sm:w-auto sm:px-2 sm:py-1 sm:text-xs"
                     >
                       Supprimer
                     </button>
@@ -418,14 +491,14 @@ export default async function AdminPage() {
               {allComments.map((c) => (
                 <div
                   key={c.id}
-                  className={`flex items-start gap-4 rounded-xl border p-4 ${
+                  className={`flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-start ${
                     c.isDeleted
                       ? "border-(--line) bg-(--paper-muted) opacity-55"
                       : "editorial-surface"
                   }`}
                 >
                   <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-semibold text-(--ink)">
                         {c.authorName}
                       </span>
@@ -447,13 +520,13 @@ export default async function AdminPage() {
                       )}
                     </p>
                   </div>
-                  <div>
+                  <div className="shrink-0">
                     {c.isDeleted ? (
                       <form action={restoreCommentAction}>
                         <input type="hidden" name="commentId" value={c.id} />
                         <button
                           type="submit"
-                          className="rounded border border-(--line) px-2 py-1 text-xs font-semibold editorial-muted hover:border-(--accent)"
+                          className="min-h-11 w-full rounded border border-(--line) px-3 py-2 text-sm font-semibold editorial-muted hover:border-(--accent) sm:min-h-0 sm:w-auto sm:px-2 sm:py-1 sm:text-xs"
                         >
                           Restaurer
                         </button>
@@ -463,7 +536,7 @@ export default async function AdminPage() {
                         <input type="hidden" name="commentId" value={c.id} />
                         <button
                           type="submit"
-                          className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                          className="min-h-11 w-full rounded border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 sm:min-h-0 sm:w-auto sm:px-2 sm:py-1 sm:text-xs"
                         >
                           Supprimer
                         </button>

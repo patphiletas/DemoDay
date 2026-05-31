@@ -5,11 +5,12 @@ import { redirect } from "next/navigation";
 import { manuscripts } from "@/db/schema";
 import { uploadCover } from "@/lib/cloudinary";
 import { db } from "@/lib/db";
+import { actionError, type ActionState, validationActionError } from "@/lib/errors";
 import { interactionRateLimit } from "@/lib/rate-limit";
 import { requireSession } from "@/lib/session";
 import { manuscriptSchema } from "@/lib/validation";
 
-export type ManuscriptSubmissionState = { error: string } | null;
+export type ManuscriptSubmissionState = ActionState;
 
 export async function submitManuscriptAction(
   _prevState: ManuscriptSubmissionState,
@@ -18,18 +19,19 @@ export async function submitManuscriptAction(
   const userId = await requireSession();
 
   if (!interactionRateLimit("manuscript", userId)) {
-    return { error: "Trop de soumissions. Réessaie dans une minute." };
+    return actionError("Trop de soumissions. Réessaie dans une minute.");
   }
 
   const result = manuscriptSchema.safeParse({
     category: formData.get("category"),
     content: formData.get("content"),
     creditedAuthorName: formData.get("creditedAuthorName"),
+    pitch: formData.get("pitch") || undefined,
     title: formData.get("title"),
   });
 
   if (!result.success) {
-    return { error: result.error.issues[0].message };
+    return validationActionError(result.error);
   }
 
   const coverFile = formData.get("coverFile");
@@ -39,7 +41,7 @@ export async function submitManuscriptAction(
     try {
       coverImageUrl = await uploadCover(coverFile);
     } catch {
-      return { error: "L'upload de l'image a échoué. Réessaie ou colle une URL." };
+      return actionError("L'upload de l'image a échoué. Réessaie ou colle une URL.");
     }
   } else if (coverUrlInput) {
     coverImageUrl = coverUrlInput;
@@ -51,6 +53,7 @@ export async function submitManuscriptAction(
     content: result.data.content,
     creditedAuthorName: result.data.creditedAuthorName,
     coverImageUrl,
+    pitch: result.data.pitch ?? null,
     status: "submitted",
     title: result.data.title,
   });

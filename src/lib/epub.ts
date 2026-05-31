@@ -64,6 +64,8 @@ export async function parseEpub(file: File): Promise<ParsedEpub> {
       return stripHtml(raw);
     }
 
+    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+
     // Passage 1 : utilise epub.flow (spine ordonné)
     for (const chapter of epub.flow) {
       const chapterId =
@@ -74,7 +76,14 @@ export async function parseEpub(file: File): Promise<ParsedEpub> {
         const text = await extractText(chapterId);
         if (text.length < 20) continue;
         const chapterTitle = chapter.title?.trim() || `Chapitre ${chapters.length + 1}`;
-        chapters.push(`## ${chapterTitle}\n\n${text}`);
+        // Les EPUBs incluent souvent le titre du chapitre dans le HTML du corps —
+        // on supprime la première ligne si elle correspond au titre (doublon visuel).
+        const firstLine = text.split("\n")[0] ?? "";
+        const cleanText =
+          normalize(firstLine) === normalize(chapterTitle)
+            ? text.slice(firstLine.length).replace(/^\n+/, "")
+            : text;
+        chapters.push(`## ${chapterTitle}\n\n${cleanText}`);
       } catch {
         // chapitre illisible
       }

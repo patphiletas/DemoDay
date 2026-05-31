@@ -14,7 +14,7 @@ export function HorizontalScroll({ children }: { children: React.ReactNode }) {
       <button
         onClick={() => scroll("left")}
         aria-label="Précédent"
-        className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-sm hover:border-[color:var(--accent)]"
+        className="absolute -left-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-sm hover:border-[color:var(--accent)] sm:block"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[color:var(--ink-soft)]">
           <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -23,7 +23,7 @@ export function HorizontalScroll({ children }: { children: React.ReactNode }) {
 
       <div
         ref={ref}
-        className="flex snap-x gap-4 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
       >
         {children}
       </div>
@@ -31,7 +31,7 @@ export function HorizontalScroll({ children }: { children: React.ReactNode }) {
       <button
         onClick={() => scroll("right")}
         aria-label="Suivant"
-        className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-sm hover:border-[color:var(--accent)]"
+        className="absolute -right-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-sm hover:border-[color:var(--accent)] sm:block"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[color:var(--ink-soft)]">
           <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

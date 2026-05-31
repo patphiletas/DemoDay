@@ -35,6 +35,10 @@ export const manuscriptSchema = z.object({
     .string()
     .min(100, "Le contenu doit contenir au moins 100 caractères"),
   category: z.string().min(1, "La catégorie est requise"),
+  pitch: z
+    .string()
+    .max(300, "Le pitch ne peut pas dépasser 300 caractères")
+    .optional(),
 });
 
 export const commentSchema = z.object({

@@ -134,9 +134,9 @@ La session Better Auth ne contient pas le rôle. Une extension de session via pl
 
 ---
 
-### 3.4 Pas d'Error Boundary — 🔵 Ouvert
+### 3.4 Error Boundary App Router — ✅ Résolu
 
-Aucun `error.tsx` par segment. Une coupure DB ou timeout Neon affiche l'écran d'erreur générique Next.js.
+`src/app/error.tsx` fournit maintenant un fallback user-friendly avec relance via `unstable_retry`. Les retours d'erreurs des formulaires sont centralisés dans `src/lib/errors.ts`.
 
 ---
 

@@ -161,6 +161,23 @@ export default function ManuscriptSubmissionForm() {
       </div>
 
       <div>
+        <label htmlFor="pitch" className="block text-sm font-semibold text-(--ink)">
+          Pitch <span className="font-normal editorial-muted">(optionnel)</span>
+        </label>
+        <p className="mt-1 text-xs editorial-muted">
+          Une accroche courte (max 300 caractères) — elle pourra être modifiée ou complétée par l&apos;équipe éditoriale.
+        </p>
+        <textarea
+          id="pitch"
+          name="pitch"
+          rows={2}
+          maxLength={300}
+          className="field mt-2 resize-none px-3 py-2 text-sm"
+          placeholder="Une phrase qui donne envie de lire…"
+        />
+      </div>
+
+      <div>
         <label className="block text-sm font-semibold text-(--ink)">
           Image de couverture <span className="font-normal editorial-muted">(optionnel)</span>
         </label>
@@ -180,6 +197,7 @@ export default function ManuscriptSubmissionForm() {
             onChange={(e) => setCoverPreview(e.target.value || null)}
           />
           {coverPreview && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={coverPreview}
               alt="Prévisualisation couverture"
@@ -187,7 +205,7 @@ export default function ManuscriptSubmissionForm() {
             />
           )}
           <p className="text-xs editorial-muted">
-            L'image sera soumise à validation éditoriale. Le fichier a priorité sur l'URL.
+            L&apos;image sera soumise à validation éditoriale. Le fichier a priorité sur l&apos;URL.
           </p>
         </div>
       </div>

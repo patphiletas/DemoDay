@@ -2,7 +2,6 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { and, asc, avg, count, desc, eq, gt, lt, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import Image from "next/image";
 import Link from "next/link";
 import {
   commentPublicationAction,
@@ -14,6 +13,7 @@ import { comments, publications, ratings, users } from "@/db/schema";
 import { parseChapters } from "@/lib/utils";
 import ScrollToTop from "@/components/ScrollToTop";
 import CoverZoom from "@/components/CoverZoom";
+import ReadingTextControls from "@/components/ReadingTextControls";
 
 const publicationAuthors = alias(users, "publication_authors");
 const commentAuthors = alias(users, "comment_authors");
@@ -121,6 +121,10 @@ export default async function PublicationPage({
   const nextPublication = nextDirect ?? firstPublication;
 
   const chapters = parseChapters(publication.content);
+  const chapterLinks = chapters.map((chapter, index) => ({
+    id: `ch-${index}`,
+    title: chapter.title,
+  }));
 
   const averageScore =
     ratingStats.average !== null ? Number(ratingStats.average).toFixed(1) : null;
@@ -148,8 +152,8 @@ export default async function PublicationPage({
           )}
         </nav>
 
-        <header className="grid gap-8 border-b pb-8 rule lg:grid-cols-[280px_minmax(0,1fr)]">
-          <div className="editorial-surface overflow-hidden rounded-lg">
+        <header className="grid gap-6 border-b pb-8 rule lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-8">
+          <div className="editorial-surface mx-auto w-full max-w-64 overflow-hidden rounded-lg lg:max-w-none">
             {publication.coverImageUrl ? (
               <CoverZoom
                 src={publication.coverImageUrl}
@@ -174,7 +178,7 @@ export default async function PublicationPage({
 
           <div className="space-y-4 self-end">
             <p className="editorial-label">{publication.category}</p>
-            <h1 className="font-serif-display text-5xl font-bold leading-tight text-[color:var(--ink)] md:text-6xl">
+            <h1 className="font-serif-display text-4xl font-bold leading-tight text-[color:var(--ink)] md:text-6xl">
               {publication.title}
             </h1>
             <p className="text-sm editorial-muted">
@@ -188,7 +192,7 @@ export default async function PublicationPage({
             <p className="text-xs editorial-muted">
               Déposé par {publication.submitterName}
             </p>
-            <p className="font-serif-display text-xl italic leading-8 editorial-muted">
+            <p className="font-serif-display text-lg italic leading-7 editorial-muted sm:text-xl sm:leading-8">
               {publication.pitch}
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
@@ -196,7 +200,7 @@ export default async function PublicationPage({
                 Lire
               </a>
               {chapters.length > 0 && (
-                <a href="#chapitres" className="btn-secondary min-h-0 px-3 py-2">
+                <a href="#texte" className="btn-secondary min-h-0 px-3 py-2">
                   {chapters.length} chapitre{chapters.length > 1 ? "s" : ""}
                 </a>
               )}
@@ -207,31 +211,33 @@ export default async function PublicationPage({
           </div>
         </header>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-          <article id="texte" className="order-2 lg:order-1">
-            {chapters.length > 0 ? (
-              <div className="space-y-12">
-                {chapters.map((ch, i) => (
-                  <section key={i} id={`ch-${i}`} className="scroll-mt-24 space-y-4">
-                    <h2 className="font-serif-display text-2xl font-bold text-(--ink) border-b pb-3 rule">
-                      {ch.title}
-                    </h2>
-                    <div className="whitespace-pre-wrap font-serif-display text-lg leading-8 text-(--ink)">
-                      {ch.content}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            ) : (
-              <div className="whitespace-pre-wrap font-serif-display text-lg leading-8 text-(--ink)">
-                {publication.content}
-              </div>
-            )}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+          <article id="texte" className="order-1 min-w-0">
+            <ReadingTextControls chapterLinks={chapterLinks}>
+              {chapters.length > 0 ? (
+                <div className="space-y-12">
+                  {chapters.map((ch, i) => (
+                    <section key={i} id={`ch-${i}`} className="scroll-mt-32 space-y-4">
+                      <h2 className="break-words font-serif-display border-b pb-3 text-2xl font-bold text-(--ink) rule">
+                        {ch.title}
+                      </h2>
+                      <div className="reading-body whitespace-pre-wrap font-serif-display text-(--ink)">
+                        {ch.content}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              ) : (
+                <div className="reading-body whitespace-pre-wrap font-serif-display text-(--ink)">
+                  {publication.content}
+                </div>
+              )}
+            </ReadingTextControls>
           </article>
 
-          <aside id="avis" className="order-1 space-y-6 lg:sticky lg:top-24 lg:order-2">
+          <aside id="avis" className="order-2 space-y-6 lg:sticky lg:top-24">
             {chapters.length > 0 && (
-              <section id="chapitres" className="editorial-surface space-y-3 rounded-lg p-5">
+              <section className="editorial-surface hidden space-y-3 rounded-lg p-5 lg:block">
                 <p className="editorial-label">Chapitres</p>
                 <ol className="max-h-56 space-y-1 overflow-y-auto pr-1">
                   {chapters.map((ch, i) => (

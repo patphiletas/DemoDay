@@ -106,10 +106,10 @@ export default async function Home({
         <div className="grid gap-8 border-b pb-10 rule lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
           <div className="space-y-6">
             <p className="editorial-label">Édition indépendante</p>
-            <h1 className="font-serif-display text-5xl font-bold leading-none text-(--ink) sm:text-6xl md:text-7xl">
+            <h1 className="font-serif-display text-4xl font-bold leading-none text-(--ink) sm:text-6xl md:text-7xl">
               Alter<span className="text-(--ink)">Native</span>
             </h1>
-            <p className="max-w-2xl text-xl leading-8 editorial-muted">
+            <p className="max-w-2xl text-lg leading-7 editorial-muted sm:text-xl sm:leading-8">
               Une autre manière de découvrir, lire et diffuser des textes.
             </p>
           </div>
@@ -136,7 +136,7 @@ export default async function Home({
           <input id="compact-publications" type="checkbox" className="compact-toggle peer sr-only" />
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="font-serif-display text-3xl font-bold text-(--ink)">
+              <h2 className="font-serif-display text-2xl font-bold text-(--ink) sm:text-3xl">
                 {q ? `Résultats pour « ${q} »` : "Dernières publications"}
               </h2>
               <p className="mt-1 text-sm editorial-muted">
@@ -144,6 +144,12 @@ export default async function Home({
                   ? `${featuredPublications.length} publication${featuredPublications.length !== 1 ? "s" : ""} trouvée${featuredPublications.length !== 1 ? "s" : ""}.`
                   : "Les textes récemment publiés par la communauté."}
               </p>
+              <label
+                htmlFor="compact-publications"
+                className="mt-2 inline-block cursor-pointer select-none rounded-md border border-(--line) px-3 py-1.5 text-xs font-semibold editorial-muted hover:border-(--accent) hover:text-(--ink)"
+              >
+                Vue compacte
+              </label>
             </div>
             <Suspense fallback={null}>
               <SearchBar />

@@ -26,7 +26,7 @@ Une plateforme où :
 - [x] 4. Validation d'inputs côté serveur
 - [x] 5. Suite de tests
 - [x] 6. CI avec GitHub Actions
-- [ ] 7. Gestion d'erreurs centralisée (`errors.ts` + `error.tsx` — non implémenté)
+- [x] 7. Gestion d'erreurs centralisée (`errors.ts` + `error.tsx`)
 
 ---
 
@@ -538,11 +538,11 @@ ratings
 
 **Checkpoint** ✅
 ```
-- [ ] Classe d'erreurs custom créée
-- [ ] Page error.tsx fonctionne
-- [ ] Server Actions retournent {success, error, data}
-- [ ] Erreurs affichées user-friendly
-- [ ] Pas d'erreur brute exposée
+- [x] Helpers d'erreurs créés (`ActionState`, `actionError`, `validationActionError`)
+- [x] Page error.tsx fonctionne
+- [x] Server Actions de formulaires retournent un état d'erreur partagé
+- [x] Erreurs affichées user-friendly
+- [x] Pas d'erreur brute exposée dans le fallback applicatif
 ```
 
 ---
@@ -744,7 +744,7 @@ ratings
 - [x] Recherche et filtres (ILIKE sur homepage, URL partageable `?q=`)
 - [x] Routes dynamiques
 - [x] Validation Zod partout
-- [ ] Gestion d'erreurs centralisée
+- [x] Gestion d'erreurs centralisée
 - [x] Tests + CI
 - [x] Déploiement en prod
 

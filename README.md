@@ -20,7 +20,7 @@
 
 ## Aperçu
 
-AlterNative est une plateforme full-stack de gestion de publications : les auteurs soumettent des manuscrits, les admins les acceptent ou rejettent, et les lecteurs peuvent noter et commenter les œuvres publiées. Le projet couvre auth, BDD relationnelle, Server Actions, upload d'images, CI/CD et mode sombre.
+AlterNative est une plateforme full-stack de gestion de publications : les auteurs soumettent des manuscrits, les admins les acceptent ou rejettent, et les lecteurs peuvent noter et commenter les œuvres publiées. Le projet couvre auth, BDD relationnelle, Server Actions, gestion d'erreurs, upload d'images, CI/CD et mode sombre.
 
 lien vers la démo : https://demo-day-wine.vercel.app/
 
@@ -38,12 +38,16 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 | 🖼️ Couvertures | Upload d'image via Cloudinary ou URL externe, proposée à la soumission et confirmée à l'acceptation |
 | 📥 Import EPUB | Extraction automatique du titre, de l'auteur, des chapitres (`##`) et de la couverture depuis un fichier `.epub` |
 | 📖 Chapitres | Affichage structuré avec index sticky dans la barre latérale, bouton retour en haut de page |
-| 🛡️ Dashboard admin | Gestion des manuscrits en attente, édition du texte avant publication, modération des commentaires, visibilité |
+| 🔠 Confort de lecture | Contrôle A− / A+ pour ajuster la taille du texte principal |
+| 🔍 Zoom couverture | Lightbox au clic sur la couverture (fermeture Échap / clic extérieur) |
+| 🛡️ Dashboard admin | Édition titre/auteur/texte avant publication, gestion couverture, refus/suppression manuscrits, modération commentaires, visibilité |
 | 👤 Dashboard perso | Manuscrits soumis, livres notés 5★, publications acceptées |
 | 📧 Emails transactionnels | Resend — confirmation d'inscription, notification d'acceptation/refus de manuscrit |
 | 🌙 Mode sombre | Basculement manuel + respect de `prefers-color-scheme`, sans flash au chargement |
+| 📱 Responsive | Layout mobile optimisé pour la lecture, l'admin, la navigation et le carousel |
+| 🧯 Erreurs | Boundary `error.tsx` avec relance du rendu et helpers partagés pour les retours de Server Actions |
 | 🔒 Rate limiting | 5 tentatives/15 min sur auth, 10 interactions/min par utilisateur |
-| ✅ Tests & CI/CD | Vitest + GitHub Actions (lint + tests sur chaque push) + déploiement Vercel |
+| ✅ Tests & CI/CD | Vitest + GitHub Actions (tests sur chaque push) + déploiement Vercel |
 
 ---
 
@@ -75,6 +79,7 @@ demoday/
 │   │   ├── dashboard/       # dashboard utilisateur
 │   │   ├── manuscripts/     # soumission de manuscrit
 │   │   ├── publications/    # [slug] — page de lecture
+│   │   ├── error.tsx        # fallback d'erreur App Router
 │   │   ├── layout.tsx       # root layout + ThemeProvider
 │   │   └── page.tsx         # homepage carousel + recherche
 │   ├── components/          # Navbar, ThemeToggle, SearchBar, ...
@@ -87,14 +92,16 @@ demoday/
 │       ├── cloudinary.ts    # upload d'images vers Cloudinary
 │       ├── db.ts            # client Drizzle
 │       ├── email.ts         # emails transactionnels Resend
+│       ├── errors.ts        # ActionState + helpers d'erreurs de formulaires
 │       ├── epub.ts          # parsing EPUB (chapitres, couverture) via epub2
 │       ├── rate-limit.ts    # rate limiting in-memory
 │       ├── session.ts       # gardes d'auth partagés (requireSession, requireAdmin)
 │       ├── utils.ts         # utilitaires (slugify, parseChapters)
-│       └── validation.ts    # schemas Zod + types inférés
+│       ├── validation.ts    # schemas Zod + types inférés
+│       └── *.test.ts        # tests validation + helpers d'erreurs
 ├── .github/
 │   └── workflows/
-│       └── learn-github-actions.yml  # CI : npm ci + npm test
+│       └── learn-github-actions.yml  # CI : npm ci + npm test -- --run
 └── drizzle.config.ts
 ```
 
@@ -109,12 +116,15 @@ id                  id                      id
 name                title                   slug
 email               content                 title
 username            category                content
-role ────────────── authorId (FK)           category
-                    status                  pitch
-                    submittedAt             coverImageUrl
-                    reviewedAt              authorId (FK)
-sessions            rejectionReason         publishedAt
-accounts                                    isVisible
+role ────────────── creditedAuthorName      category
+                    coverImageUrl           pitch
+                    pitch                   coverImageUrl
+                    authorId (FK)           creditedAuthorName
+                    status                  authorId (FK)
+                    submittedAt             publishedAt
+                    reviewedAt              isVisible
+sessions            rejectionReason
+accounts
 verifications       comments                ratings
                     ──────────              ───────
                     id                      id
@@ -175,12 +185,13 @@ npm run dev
 
 ```bash
 npm test          # Vitest en mode watch
+npm test -- --run # Vitest en one-shot
 npm run test:ui   # Interface Vitest UI
 ```
 
 Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exécute à chaque push :
 1. `npm ci`
-2. `npm test`
+2. `npm test -- --run`
 
 ---
 
@@ -192,7 +203,7 @@ Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exé
 | 2 | BDD + migrations | Drizzle ORM + PostgreSQL (Neon) |
 | 3 | Auth + protections | Better Auth + sessions HTTP-only |
 | 4 | Validation serveur | Zod v4 schemas |
-| 5 | Tests unitaires | Vitest — validation schemas |
+| 5 | Tests unitaires | Vitest — validation schemas + helpers d'erreurs |
 | 6 | CI/CD | GitHub Actions + Vercel |
 | 7 | Mode sombre | `ThemeToggle` + `prefers-color-scheme` + Tailwind `dark:` |
 | 8 | Upload d'images | Cloudinary v2 depuis Server Action et route API |
