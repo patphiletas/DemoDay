@@ -12,6 +12,8 @@ export type ParsedEpub = {
 
 function stripHtml(html: string): string {
   return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n\n")
     .replace(/<[^>]+>/g, "")
@@ -75,7 +77,7 @@ export async function parseEpub(file: File): Promise<ParsedEpub> {
       try {
         const text = await extractText(chapterId);
         if (text.length < 20) continue;
-        const chapterTitle = chapter.title?.trim() || `Chapitre ${chapters.length + 1}`;
+        const chapterTitle = stripHtml(chapter.title?.trim() || "") || `Chapitre ${chapters.length + 1}`;
         // Les EPUBs incluent souvent le titre du chapitre dans le HTML du corps —
         // on supprime la première ligne si elle correspond au titre (doublon visuel).
         const firstLine = text.split("\n")[0] ?? "";
