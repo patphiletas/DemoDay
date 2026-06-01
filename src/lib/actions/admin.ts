@@ -9,10 +9,33 @@ import { sendManuscriptAcceptedEmail, sendManuscriptRejectedEmail } from "@/lib/
 import { requireAdmin } from "@/lib/session";
 import { slugify } from "@/lib/utils";
 
+// Fix #1 — valide qu'un ID FormData est un entier positif
+function getId(formData: FormData, key: string): number | null {
+  const n = Number(formData.get(key));
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+// Fix #5 (critique) — logique de résolution de couverture extraite
+async function resolveCoverImage(
+  formData: FormData,
+  fallback: string | null = null
+): Promise<string | null> {
+  const coverFile = formData.get("coverFile");
+  const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
+  if (coverFile instanceof File && coverFile.size > 0 && coverFile.type.startsWith("image/")) {
+    const uploaded = await uploadCover(coverFile).catch(() => null);
+    if (uploaded) return uploaded;
+  }
+  if (coverUrlInput) return coverUrlInput;
+  return fallback;
+}
+
 export async function editManuscriptContentAction(formData: FormData) {
   await requireAdmin();
 
-  const manuscriptId = Number(formData.get("manuscriptId"));
+  const manuscriptId = getId(formData, "manuscriptId"); // Fix #1
+  if (!manuscriptId) return;
+
   const title = String(formData.get("title") ?? "").trim();
   const creditedAuthorName = String(formData.get("creditedAuthorName") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
@@ -34,28 +57,18 @@ export async function editManuscriptContentAction(formData: FormData) {
 export async function acceptManuscriptAction(formData: FormData) {
   await requireAdmin();
 
-  const manuscriptId = Number(formData.get("manuscriptId"));
+  const manuscriptId = getId(formData, "manuscriptId"); // Fix #1
+  if (!manuscriptId) return;
+
   const editorNote = String(formData.get("editorNote") ?? "").trim();
   const pitch = String(formData.get("pitch") ?? "").trim();
 
   const manuscript = await db.query.manuscripts.findFirst({
     where: eq(manuscripts.id, manuscriptId),
   });
-
   if (!manuscript) return;
 
-  const coverFile = formData.get("coverFile");
-  const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
-  let coverImageUrl: string | null = null;
-  if (coverFile instanceof File && coverFile.size > 0 && coverFile.type.startsWith("image/")) {
-    coverImageUrl = await uploadCover(coverFile).catch(() => null);
-  }
-  if (!coverImageUrl && coverUrlInput) {
-    coverImageUrl = coverUrlInput;
-  }
-  if (!coverImageUrl) {
-    coverImageUrl = manuscript.coverImageUrl ?? null;
-  }
+  const coverImageUrl = await resolveCoverImage(formData, manuscript.coverImageUrl ?? null); // Fix #5
 
   const author = await db.query.users.findFirst({
     where: eq(users.id, manuscript.authorId),
@@ -64,36 +77,44 @@ export async function acceptManuscriptAction(formData: FormData) {
   const baseSlug = slugify(manuscript.title);
   const slug = `${baseSlug}-${manuscriptId}`;
 
-  await db.transaction(async (tx) => {
-    await tx.insert(publications).values({
-      slug,
-      title: manuscript.title,
-      content: manuscript.content,
-      category: manuscript.category ?? "Autre",
-      pitch: pitch || manuscript.title,
-      coverImageUrl,
-      creditedAuthorName: manuscript.creditedAuthorName,
-      authorId: manuscript.authorId,
-      isVisible: true,
-    });
+  try { // Fix #3 — gère une éventuelle collision de slug (acceptation simultanée)
+    await db.transaction(async (tx) => {
+      const [inserted] = await tx
+        .insert(publications)
+        .values({
+          slug,
+          title: manuscript.title,
+          content: manuscript.content,
+          category: manuscript.category ?? "Autre",
+          pitch: pitch || manuscript.title,
+          coverImageUrl,
+          creditedAuthorName: manuscript.creditedAuthorName,
+          authorId: manuscript.authorId,
+          isVisible: true,
+        })
+        .returning({ id: publications.id });
 
-    await tx
-      .update(manuscripts)
-      .set({
-        status: "accepted",
-        reviewedAt: new Date(),
-        pitch: pitch || manuscript.title,
-        coverImageUrl: coverImageUrl ?? manuscript.coverImageUrl,
-      })
-      .where(eq(manuscripts.id, manuscriptId));
+      await tx
+        .update(manuscripts)
+        .set({
+          status: "accepted",
+          reviewedAt: new Date(),
+          pitch: pitch || manuscript.title,
+          coverImageUrl: coverImageUrl ?? manuscript.coverImageUrl,
+          publicationId: inserted.id, // Fix #4 — stocke la FK vers la publication
+        })
+        .where(eq(manuscripts.id, manuscriptId));
 
-    await tx.insert(notifications).values({
-      userId: manuscript.authorId,
-      type: "manuscript_accepted",
-      relatedId: manuscriptId,
-      message: editorNote || "Votre manuscrit a été accepté et publié.",
+      await tx.insert(notifications).values({
+        userId: manuscript.authorId,
+        type: "manuscript_accepted",
+        relatedId: manuscriptId,
+        message: editorNote || "Votre manuscrit a été accepté et publié.",
+      });
     });
-  });
+  } catch {
+    return; // slug déjà pris ou autre contrainte DB
+  }
 
   if (author) {
     sendManuscriptAcceptedEmail(
@@ -112,13 +133,14 @@ export async function acceptManuscriptAction(formData: FormData) {
 export async function rejectManuscriptAction(formData: FormData) {
   await requireAdmin();
 
-  const manuscriptId = Number(formData.get("manuscriptId"));
+  const manuscriptId = getId(formData, "manuscriptId"); // Fix #1
+  if (!manuscriptId) return;
+
   const reason = String(formData.get("reason") ?? "").trim();
 
   const manuscript = await db.query.manuscripts.findFirst({
     where: eq(manuscripts.id, manuscriptId),
   });
-
   if (!manuscript) return;
 
   const author = await db.query.users.findFirst({
@@ -156,35 +178,44 @@ export async function rejectManuscriptAction(formData: FormData) {
 export async function unpublishAction(formData: FormData) {
   await requireAdmin();
 
-  const publicationId = Number(formData.get("publicationId"));
+  const publicationId = getId(formData, "publicationId"); // Fix #1
+  if (!publicationId) return;
 
   const pub = await db.query.publications.findFirst({
     where: eq(publications.id, publicationId),
   });
-
   if (!pub) return;
 
-  await db.delete(ratings).where(eq(ratings.publicationId, publicationId));
-  await db.delete(comments).where(eq(comments.publicationId, publicationId));
-  await db.delete(publications).where(eq(publications.id, publicationId));
+  // Fix #4 — retrouve le manuscrit par FK directe (plus fiable que la correspondance par titre)
+  // Fallback sur authorId+title pour les publications créées avant cette migration
+  const relatedManuscript =
+    (await db.query.manuscripts.findFirst({
+      where: eq(manuscripts.publicationId, publicationId),
+    })) ??
+    (await db.query.manuscripts.findFirst({
+      where: (m, { and, eq: eqFn }) =>
+        and(eqFn(m.authorId, pub.authorId), eqFn(m.title, pub.title), eqFn(m.status, "accepted")),
+    }));
 
-  // Repasse le manuscrit accepté de cet auteur avec ce titre en "submitted"
-  const relatedManuscript = await db.query.manuscripts.findFirst({
-    where: (m, { and, eq: eqFn }) =>
-      and(eqFn(m.authorId, pub.authorId), eqFn(m.title, pub.title), eqFn(m.status, "accepted")),
+  // Fix #2 — les suppressions sont dans une transaction atomique
+  await db.transaction(async (tx) => {
+    await tx.delete(ratings).where(eq(ratings.publicationId, publicationId));
+    await tx.delete(comments).where(eq(comments.publicationId, publicationId));
+    await tx.delete(publications).where(eq(publications.id, publicationId));
+    // onDelete:"set null" sur manuscripts.publicationId gère le NULL automatiquement
+
+    if (relatedManuscript) {
+      await tx
+        .update(manuscripts)
+        .set({
+          status: "submitted",
+          reviewedAt: null,
+          pitch: pub.pitch,
+          coverImageUrl: pub.coverImageUrl ?? relatedManuscript.coverImageUrl,
+        })
+        .where(eq(manuscripts.id, relatedManuscript.id));
+    }
   });
-
-  if (relatedManuscript) {
-    await db
-      .update(manuscripts)
-      .set({
-        status: "submitted",
-        reviewedAt: null,
-        pitch: pub.pitch,
-        coverImageUrl: pub.coverImageUrl ?? relatedManuscript.coverImageUrl,
-      })
-      .where(eq(manuscripts.id, relatedManuscript.id));
-  }
 
   revalidatePath("/admin");
   revalidatePath("/");
@@ -193,18 +224,11 @@ export async function unpublishAction(formData: FormData) {
 export async function updatePublicationCoverAction(formData: FormData) {
   await requireAdmin();
 
-  const publicationId = Number(formData.get("publicationId"));
-  const coverFile = formData.get("coverFile");
-  const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
+  const publicationId = getId(formData, "publicationId"); // Fix #1
+  if (!publicationId) return;
 
-  let coverImageUrl: string | null = null;
-  if (coverFile instanceof File && coverFile.size > 0 && coverFile.type.startsWith("image/")) {
-    coverImageUrl = await uploadCover(coverFile).catch(() => null);
-  }
-  if (!coverImageUrl && coverUrlInput) {
-    coverImageUrl = coverUrlInput;
-  }
-  if (coverImageUrl === null) return;
+  const coverImageUrl = await resolveCoverImage(formData); // Fix #5
+  if (!coverImageUrl) return;
 
   await db
     .update(publications)
@@ -218,7 +242,9 @@ export async function updatePublicationCoverAction(formData: FormData) {
 export async function togglePublicationVisibilityAction(formData: FormData) {
   await requireAdmin();
 
-  const publicationId = Number(formData.get("publicationId"));
+  const publicationId = getId(formData, "publicationId"); // Fix #1
+  if (!publicationId) return;
+
   const currentVisible = formData.get("isVisible") === "true";
 
   await db
@@ -233,7 +259,8 @@ export async function togglePublicationVisibilityAction(formData: FormData) {
 export async function deleteManuscriptAction(formData: FormData) {
   await requireAdmin();
 
-  const manuscriptId = Number(formData.get("manuscriptId"));
+  const manuscriptId = getId(formData, "manuscriptId"); // Fix #1
+  if (!manuscriptId) return;
 
   await db.delete(manuscripts).where(eq(manuscripts.id, manuscriptId));
 
@@ -243,7 +270,8 @@ export async function deleteManuscriptAction(formData: FormData) {
 export async function deleteCommentAction(formData: FormData) {
   await requireAdmin();
 
-  const commentId = Number(formData.get("commentId"));
+  const commentId = getId(formData, "commentId"); // Fix #1
+  if (!commentId) return;
 
   await db
     .update(comments)
@@ -257,7 +285,8 @@ export async function deleteCommentAction(formData: FormData) {
 export async function restoreCommentAction(formData: FormData) {
   await requireAdmin();
 
-  const commentId = Number(formData.get("commentId"));
+  const commentId = getId(formData, "commentId"); // Fix #1
+  if (!commentId) return;
 
   await db
     .update(comments)
