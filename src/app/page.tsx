@@ -110,11 +110,11 @@ export default async function Home({
               Alter<span className="text-(--ink)">Native</span>
             </h1>
             <p className="max-w-2xl text-lg leading-7 editorial-muted sm:text-xl sm:leading-8">
-              Une autre manière de découvrir, lire et diffuser des textes.
+              Une autre manière de découvrir, lire et diffuser des textes originaux ou libres de droits.
             </p>
           </div>
    
-          {!session && (
+          {/* {!session && (
             <div className="flex flex-wrap gap-3 lg:col-span-2">
               <a
                 href="/signup"
@@ -129,7 +129,7 @@ export default async function Home({
                 Se connecter
               </a>
             </div>
-          )}
+          )} */}
         </div>
 
         <section className="space-y-6">
