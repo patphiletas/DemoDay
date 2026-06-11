@@ -3,10 +3,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+const MAX_SEARCH_QUERY_LENGTH = 100;
+
 export function SearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("q") ?? "");
+  const [value, setValue] = useState((searchParams.get("q") ?? "").slice(0, MAX_SEARCH_QUERY_LENGTH));
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentQuery = searchParams.get("q") ?? "";
   const searchParamsString = searchParams.toString();
@@ -14,7 +16,7 @@ export function SearchBar() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    const nextQuery = value.trim();
+    const nextQuery = value.trim().slice(0, MAX_SEARCH_QUERY_LENGTH);
     if (nextQuery === currentQuery) {
       return;
     }
@@ -50,7 +52,8 @@ export function SearchBar() {
       <input
         type="search"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        maxLength={MAX_SEARCH_QUERY_LENGTH}
+        onChange={(e) => setValue(e.target.value.slice(0, MAX_SEARCH_QUERY_LENGTH))}
         placeholder="Titre, auteur, catégorie…"
         className="w-full rounded-md border border-[color:var(--line)] bg-[color:var(--paper)] py-2 pl-9 pr-4 text-sm text-[color:var(--ink)] placeholder:text-[color:var(--ink-soft)] focus:outline-none focus:ring-2 focus:ring-[color:var(--accent)]"
       />

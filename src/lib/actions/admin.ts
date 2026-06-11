@@ -8,6 +8,7 @@ import { uploadCover } from "@/lib/cloudinary";
 import { sendManuscriptAcceptedEmail, sendManuscriptRejectedEmail } from "@/lib/email";
 import { requireAdmin } from "@/lib/session";
 import { slugify } from "@/lib/utils";
+import { parseHttpsImageUrl } from "@/lib/validation";
 
 // Fix #1 — valide qu'un ID FormData est un entier positif
 function getId(formData: FormData, key: string): number | null {
@@ -26,7 +27,7 @@ async function resolveCoverImage(
     const uploaded = await uploadCover(coverFile).catch(() => null);
     if (uploaded) return uploaded;
   }
-  if (coverUrlInput) return coverUrlInput;
+  if (coverUrlInput) return parseHttpsImageUrl(coverUrlInput) ?? fallback;
   return fallback;
 }
 

@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { actionError, type ActionState, validationActionError } from "@/lib/errors";
 import { interactionRateLimit } from "@/lib/rate-limit";
 import { requireSession } from "@/lib/session";
-import { manuscriptSchema } from "@/lib/validation";
+import { manuscriptSchema, parseHttpsImageUrl } from "@/lib/validation";
 
 export type ManuscriptSubmissionState = ActionState;
 
@@ -38,13 +38,21 @@ export async function submitManuscriptAction(
   const coverUrlInput = String(formData.get("coverImageUrl") ?? "").trim();
   let coverImageUrl: string | null = null;
   if (coverFile instanceof File && coverFile.size > 0) {
+    if (!coverFile.type.startsWith("image/")) {
+      return actionError("Le fichier de couverture doit être une image.");
+    }
+
     try {
       coverImageUrl = await uploadCover(coverFile);
     } catch {
       return actionError("L'upload de l'image a échoué. Réessaie ou colle une URL.");
     }
   } else if (coverUrlInput) {
-    coverImageUrl = coverUrlInput;
+    const parsedCoverUrl = parseHttpsImageUrl(coverUrlInput);
+    if (!parsedCoverUrl) {
+      return actionError("L'URL de couverture doit être une URL https valide.");
+    }
+    coverImageUrl = parsedCoverUrl;
   }
 
   await db.insert(manuscripts).values({

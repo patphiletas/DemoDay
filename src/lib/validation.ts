@@ -1,5 +1,23 @@
 import { z } from "zod";
 
+export const httpsImageUrlSchema = z
+  .string()
+  .trim()
+  .url("URL d'image invalide")
+  .refine((value) => {
+    try {
+      return new URL(value).protocol === "https:";
+    } catch {
+      return false;
+    }
+  }, "L'URL de l'image doit commencer par https://")
+  .transform((value) => new URL(value).toString());
+
+export function parseHttpsImageUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const result = httpsImageUrlSchema.safeParse(value);
+  return result.success ? result.data : null;
+}
 
 export const signupSchema = z.object({
   email: z.string().email("Email invalide").trim().toLowerCase(),

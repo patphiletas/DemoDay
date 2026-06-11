@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { comments, publications, ratings, users } from "@/db/schema";
 
 const publicationAuthors = alias(users, "publication_authors");
+const MAX_SEARCH_QUERY_LENGTH = 100;
 
 export default async function Home({
   searchParams,
@@ -21,7 +22,10 @@ export default async function Home({
     searchParams,
   ]);
 
-  const q = typeof resolvedParams.q === "string" ? resolvedParams.q.trim() : "";
+  const q =
+    typeof resolvedParams.q === "string"
+      ? resolvedParams.q.trim().slice(0, MAX_SEARCH_QUERY_LENGTH)
+      : "";
 
   const searchFilter = q
     ? or(

@@ -1,12 +1,31 @@
 import { describe, expect, it } from "vitest";
 import {
   commentSchema,
+  httpsImageUrlSchema,
   manuscriptSchema,
+  parseHttpsImageUrl,
   ratingSchema,
   reportSchema,
   signinSchema,
   signupSchema,
 } from "./validation";
+
+describe("httpsImageUrlSchema", () => {
+  it("accepts https image URLs", () => {
+    expect(httpsImageUrlSchema.safeParse("https://example.com/cover.jpg").success).toBe(true);
+  });
+
+  it("rejects non-https URLs", () => {
+    for (const url of ["http://example.com/cover.jpg", "javascript:alert(1)", "data:image/svg+xml,<svg />"]) {
+      expect(httpsImageUrlSchema.safeParse(url).success, `${url} should be rejected`).toBe(false);
+    }
+  });
+
+  it("returns null for invalid or empty cover URLs", () => {
+    expect(parseHttpsImageUrl("")).toBeNull();
+    expect(parseHttpsImageUrl("pas une url")).toBeNull();
+  });
+});
 
 // ─── signupSchema ────────────────────────────────────────────────────────────
 
