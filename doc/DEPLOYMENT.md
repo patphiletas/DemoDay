@@ -39,7 +39,7 @@ Vercel déploie automatiquement à chaque `git push` sur `main`. Pas de configur
 
 ## CI — GitHub Actions
 
-**Fichier :** `.github/workflows/ci.yml`
+**Fichier :** `.github/workflows/learn-github-actions.yml`
 
 ```yaml
 name: CI
@@ -51,11 +51,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
       - run: npm test -- --run
 ```
+
+La version Node est épinglée dans `.nvmrc` (racine du projet). Pour monter de version : mettre à jour `.nvmrc`, faire `nvm use`, `npm install`, commiter `.nvmrc` et `package-lock.json` ensemble.
+
+> ⚠️ Toujours lancer `npm ci --dry-run` avant de commiter pour vérifier que `package-lock.json` est en sync avec `package.json`.
 
 À chaque push sur n'importe quelle branche :
 1. Checkout du code

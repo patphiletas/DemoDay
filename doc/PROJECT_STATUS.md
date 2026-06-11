@@ -74,7 +74,17 @@
 - [x] Vitest configuré
 - [x] Tests de validation Zod + helpers d'erreurs
 - [x] GitHub Actions (tests sur chaque push)
+- [x] Node version épinglée via `.nvmrc` (24.16.0) — CI lit `node-version-file: '.nvmrc'`
 - [x] Déploiement Vercel : https://demo-day-wine.vercel.app/
+
+### Sécurité (audit 2026-06-11)
+- [x] Validation Zod sur tous les inputs critiques (signup, manuscrit, commentaire, rating, signalement)
+- [x] Drizzle ORM — requêtes paramétrées, pas d'injection SQL possible
+- [x] Pas de `dangerouslySetInnerHTML` sur du contenu utilisateur
+- [x] EPUB strippé en texte brut avant affichage
+- [x] Vérification `type.startsWith("image/")` dans `manuscripts.ts` avant upload Cloudinary
+- [x] Limite 100 chars sur `searchParams.q` (protection DoS)
+- [x] `httpsImageUrlSchema` dans `validation.ts` — URLs images forcées en `https://`
 
 ---
 

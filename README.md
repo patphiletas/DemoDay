@@ -6,7 +6,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel)](https://demo-day-wine.vercel.app/)
 &nbsp;
-[![Next.js](https://img.shields.io/badge/Next.js%2016-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js%2015-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 &nbsp;
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 &nbsp;
@@ -55,7 +55,7 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 
 | Couche | Technologie |
 |---|---|
-| Framework | Next.js 16.2.6 (App Router, Server Components, Server Actions) |
+| Framework | Next.js 15 (App Router, Server Components, Server Actions) |
 | Langage | TypeScript |
 | Style | Tailwind CSS v4 |
 | Base de données | PostgreSQL via [Neon](https://neon.tech) + Drizzle ORM |
