@@ -79,6 +79,14 @@ src/
 ### EPUB
 - Parser dans `src/lib/epub.ts` — `epub2` retourne parfois un tuple `[content, mime]`, parfois une string → toujours utiliser `Array.isArray(rawResult) ? rawResult[0] : rawResult`
 - `stripHtml` décode toutes les entités HTML (numériques, nommées, hexadécimales)
+- L'italique est conservé sous la forme `*mot*` (convention Markdown) et rendu en `<em>` à la lecture par `ReadingText` (`src/components/ReadingText.tsx` + `src/lib/inline-italic.ts`). Ne pas afficher `ch.content` brut sur la page de lecture
+- Ordre de `stripHtml` important (voir `doc/EPUB_IMPORT.md` §3e) : `<head>` retiré, espaces du source réduits à un espace, fins de bloc → paragraphe. Chaque étape corrige un bug trouvé sur de vrais EPUB
+- Tout changement du parser : ajouter un cas dans `src/lib/epub.test.ts` (EPUB fabriqués en mémoire avec `adm-zip`) et, si possible, revalider sur un lot d'EPUB réels
+- `POST /api/parse-epub` exige une session et passe par `interactionRateLimit("parse-epub", userId)`
+
+### Rate limiting
+- `src/lib/rate-limit.ts` : Upstash Redis en production (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`), repli en mémoire en local et en CI. Les deux helpers sont **async** → toujours `await`
+- Toute nouvelle route ou action qui écrit en base, envoie un email ou uploade un fichier doit être limitée (voir `doc/RATE_LIMITING.md`)
 
 ### Emails
 - Envois best-effort : toujours en dehors des transactions DB, avec `.catch(() => null)`
@@ -93,11 +101,23 @@ src/
 ```bash
 npm run dev          # Serveur de développement
 npm test -- --run    # Tests Vitest (one-shot)
+npm run lint         # ESLint
+npx tsc --noEmit     # Vérification des types
 npm run build        # Build production
 npx drizzle-kit generate   # Générer une migration
 npx drizzle-kit migrate    # Appliquer les migrations
 npx drizzle-kit studio     # UI d'exploration DB
 ```
+
+---
+
+## CI
+
+`.github/workflows/learn-github-actions.yml` lance lint, `tsc --noEmit`, tests et build sur chaque push et pull request, avec des variables d'env factices (le build n'ouvre aucune connexion). Si une nouvelle variable devient obligatoire au build, l'ajouter au bloc `env` du workflow et à `doc/DEPLOYMENT.md`.
+
+## Documentation
+
+Chaque changement est documenté dans `doc/` (le fichier thématique concerné, et `PROJECT_STATUS.md`). Garder ce fichier à jour.
 
 ---
 
