@@ -145,7 +145,7 @@ export default function ManuscriptSubmissionForm() {
           Texte
         </label>
         <p className="mt-1 text-xs editorial-muted">
-          Pour structurer en chapitres, commence chaque titre par <code>##</code> (ex : <code>## Chapitre 1</code>).
+          Pour structurer en chapitres, commence chaque titre par <code>##</code> (ex : <code>## Chapitre 1</code>). Pour l&apos;italique, entoure le mot d&apos;astérisques : <code>*mot*</code>.
         </p>
         <textarea
           id="content"

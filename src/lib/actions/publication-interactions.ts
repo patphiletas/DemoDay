@@ -34,7 +34,7 @@ export async function ratePublicationAction(formData: FormData) {
 export async function commentPublicationAction(formData: FormData) {
   const userId = await requireSession();
 
-  if (!interactionRateLimit("comment", userId)) {
+  if (!(await interactionRateLimit("comment", userId))) {
     return;
   }
 

@@ -67,6 +67,10 @@ RESEND_API_KEY=your_resend_key
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Optionnel en local (rate limiting partagé) — obligatoire en production
+UPSTASH_REDIS_REST_URL=https://your-db.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
 ```
 
 > Ces mêmes variables doivent être ajoutées dans Vercel → Settings → Environment Variables pour la production.

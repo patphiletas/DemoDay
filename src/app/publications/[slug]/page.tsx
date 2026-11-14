@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { ReadingText } from "@/components/ReadingText";
 import { notFound } from "next/navigation";
 import { and, asc, avg, count, desc, eq, gt, lt, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -222,14 +223,14 @@ export default async function PublicationPage({
                         {ch.title}
                       </h2>
                       <div className="reading-body whitespace-pre-wrap font-serif-display text-(--ink)">
-                        {ch.content}
+                        <ReadingText text={ch.content} />
                       </div>
                     </section>
                   ))}
                 </div>
               ) : (
                 <div className="reading-body whitespace-pre-wrap font-serif-display text-(--ink)">
-                  {publication.content}
+                  <ReadingText text={publication.content} />
                 </div>
               )}
             </ReadingTextControls>

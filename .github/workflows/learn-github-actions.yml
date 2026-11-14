@@ -1,10 +1,18 @@
 name: CI
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
+    # Valeurs factices : le build n'a besoin que de leur présence, aucune
+    # connexion réelle n'est ouverte pendant la CI.
+    env:
+      DATABASE_URL: postgres://ci:ci@localhost:5432/ci
+      BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-1234
+      RESEND_API_KEY: re_ci_placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -12,4 +20,11 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - run: npm test -- --run
+      - name: Lint
+        run: npm run lint
+      - name: Types
+        run: npx tsc --noEmit
+      - name: Tests
+        run: npm test -- --run
+      - name: Build
+        run: npm run build

@@ -20,8 +20,12 @@
 | `CLOUDINARY_CLOUD_NAME` | Nom du cloud Cloudinary | ✅ |
 | `CLOUDINARY_API_KEY` | Clé API Cloudinary | ✅ |
 | `CLOUDINARY_API_SECRET` | Secret API Cloudinary | ✅ |
+| `UPSTASH_REDIS_REST_URL` | URL REST de la base Upstash Redis (rate limiting partagé entre instances) | ✅ en production* |
+| `UPSTASH_REDIS_REST_TOKEN` | Token REST Upstash | ✅ en production* |
 | `OPENAI_API_KEY` | Non utilisé actuellement | ❌ |
 | `OPENAI_MODEL` | Non utilisé actuellement | ❌ |
+
+\* Sans les variables Upstash, le site fonctionne mais le rate limiting retombe sur un compteur en mémoire, quasi inopérant sur Vercel (voir `doc/RATE_LIMITING.md`).
 
 > **Format :** pas d'espace après `=`, pas de guillemets. Next.js ignore silencieusement les lignes malformées dans `.env.local`.
 
@@ -43,10 +47,16 @@ Vercel déploie automatiquement à chaque `git push` sur `main`. Pas de configur
 
 ```yaml
 name: CI
-on: [push]
+on:
+  push:
+  pull_request:
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
+    env:  # valeurs factices : le build a seulement besoin de leur présence
+      DATABASE_URL: postgres://ci:ci@localhost:5432/ci
+      BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-1234
+      RESEND_API_KEY: re_ci_placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,19 +64,25 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
       - run: npm test -- --run
+      - run: npm run build
 ```
 
 La version Node est épinglée dans `.nvmrc` (racine du projet). Pour monter de version : mettre à jour `.nvmrc`, faire `nvm use`, `npm install`, commiter `.nvmrc` et `package-lock.json` ensemble.
 
 > ⚠️ Toujours lancer `npm ci --dry-run` avant de commiter pour vérifier que `package-lock.json` est en sync avec `package.json`.
 
-À chaque push sur n'importe quelle branche :
+À chaque push (toutes branches) et sur chaque pull request :
 1. Checkout du code
 2. Installation des dépendances (`npm ci` — utilise `package-lock.json`)
-3. Lancement des tests Vitest en mode one-shot (`--run`)
+3. **Lint** (`npm run lint`)
+4. **Types** (`tsc --noEmit`) — une erreur TypeScript fait échouer la CI
+5. **Tests** Vitest en one-shot (`--run`)
+6. **Build** de production (`npm run build`) — vérifie que l'app compile réellement
 
-> ⚠️ Le CI ne vérifie que les tests Vitest. Il ne lance pas `tsc --noEmit` ni `npm run build` — une erreur TypeScript ne bloque pas le merge.
+Les secrets ne sont pas nécessaires en CI : aucune connexion à la base, à Resend ni à Cloudinary n'est ouverte pendant le build (toutes les pages sont dynamiques). Le rate limiting tourne en mode mémoire.
 
 ---
 

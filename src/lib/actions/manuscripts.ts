@@ -18,7 +18,7 @@ export async function submitManuscriptAction(
 ): Promise<ManuscriptSubmissionState> {
   const userId = await requireSession();
 
-  if (!interactionRateLimit("manuscript", userId)) {
+  if (!(await interactionRateLimit("manuscript", userId))) {
     return actionError("Trop de soumissions. Réessaie dans une minute.");
   }
 

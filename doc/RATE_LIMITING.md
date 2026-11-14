@@ -2,75 +2,52 @@
 
 ## Vue d'ensemble
 
-Le projet implémente un rate limiting in-memory pour protéger deux types d'endpoints : les formulaires d'authentification (brute force) et les interactions utilisateur (spam).
+Le projet limite le nombre de requêtes sur trois types d'endpoints : les formulaires d'authentification (brute force), les interactions utilisateur (spam) et l'import EPUB (abus d'upload).
 
 **Fichier :** `src/lib/rate-limit.ts`
 
----
-
-## Implémentation
-
-```ts
-type Entry = { count: number; resetAt: number };
-const store = new Map<string, Entry>();
-
-function check(key: string, limit: number, windowMs: number): boolean {
-  const now = Date.now();
-  const entry = store.get(key);
-
-  if (!entry || entry.resetAt < now) {
-    // Première requête ou fenêtre expirée → reset
-    store.set(key, { count: 1, resetAt: now + windowMs });
-    return true;
-  }
-
-  if (entry.count >= limit) return false;  // limite atteinte
-
-  entry.count++;
-  return true;
-}
-```
-
-La Map `store` est un singleton module-level. Chaque entrée contient un compteur et un timestamp de reset. Les entrées expirées ne sont pas purgées proactivement — elles sont réinitialisées à la prochaine requête pour la même clé.
+**Depuis le 2026-11-14**, les compteurs sont stockés dans **Upstash Redis** (`@upstash/ratelimit`). Avant, ils vivaient dans une `Map` en mémoire : sur Vercel, chaque requête peut tomber sur une instance serverless différente, avec sa propre `Map`, ce qui rendait la limite quasiment inopérante en production.
 
 ---
 
-## Les deux limiteurs
+## Deux modes
+
+| Mode | Quand | Comportement |
+|---|---|---|
+| **Upstash Redis** | `UPSTASH_REDIS_REST_URL` et `UPSTASH_REDIS_REST_TOKEN` définies (production) | Compteurs partagés entre toutes les instances, fenêtre glissante (`slidingWindow`), clés préfixées `alternative:ratelimit:` |
+| **Mémoire** | Variables absentes (dev local, tests, CI) | `Map` locale (`checkMemory`), suffisante pour un seul processus. Un avertissement est logué si ce mode tourne sur Vercel |
+
+Si Redis est injoignable, la requête est **autorisée** (et l'erreur loguée) : mieux vaut laisser passer quelques requêtes que bloquer tous les utilisateurs.
+
+---
+
+## Les règles
+
+| Règle | Limite | Fenêtre | Identifiant |
+|---|---|---|---|
+| `auth` | 5 | 15 min | IP du client |
+| `interaction` | 10 | 1 min | ID de l'utilisateur connecté |
 
 ### `authRateLimit(label)` — Authentification
 
 ```ts
 export async function authRateLimit(label: string): Promise<boolean> {
   const ip = await getClientIp();
-  return check(`${label}:${ip}`, 5, 15 * 60 * 1000);
+  return check("auth", `${label}:${ip}`);
 }
 ```
 
-| Paramètre | Valeur |
-|---|---|
-| Limite | 5 tentatives |
-| Fenêtre | 15 minutes |
-| Clé | `"signup:{ip}"` ou `"signin:{ip}"` |
-| Identifiant | Adresse IP du client |
-
-Utilisé dans `signupAction` et `signinAction`. Async car nécessite `await headers()` pour lire l'IP.
+Utilisé dans `signupAction` et `signinAction`.
 
 ### `interactionRateLimit(label, userId)` — Interactions
 
 ```ts
-export function interactionRateLimit(label: string, userId: string): boolean {
-  return check(`${label}:${userId}`, 10, 60 * 1000);
+export async function interactionRateLimit(label: string, userId: string): Promise<boolean> {
+  return check("interaction", `${label}:${userId}`);
 }
 ```
 
-| Paramètre | Valeur |
-|---|---|
-| Limite | 10 actions |
-| Fenêtre | 1 minute |
-| Clé | `"comment:{userId}"` ou `"manuscript:{userId}"` |
-| Identifiant | ID utilisateur connecté |
-
-Utilisé dans `commentPublicationAction` et `submitManuscriptAction`. Synchrone.
+Asynchrone depuis le passage à Redis (appel réseau) : les appelants font `await`. Utilisé dans `commentPublicationAction`, `submitManuscriptAction` et la route `POST /api/parse-epub`.
 
 ---
 
@@ -87,7 +64,7 @@ export async function getClientIp(): Promise<string> {
 }
 ```
 
-- `x-forwarded-for` : header posé par les proxies (Vercel, Cloudflare). Peut contenir plusieurs IPs séparées par des virgules — on prend la première (IP du client réel).
+- `x-forwarded-for` : posé par Vercel. Peut contenir plusieurs IPs — on prend la première (client réel).
 - `x-real-ip` : fallback pour certains proxies
 - `"unknown"` : fallback final — toutes les requêtes sans IP identifiable partagent la même clé (comportement conservateur)
 
@@ -95,44 +72,47 @@ export async function getClientIp(): Promise<string> {
 
 ## Comportement quand la limite est atteinte
 
-Les deux limiteurs retournent `false`. La Server Action retourne alors un `ActionError` :
-
-```ts
-// Auth
-if (!(await authRateLimit("signup"))) {
-  return actionError("Trop de tentatives. Réessaie dans 15 minutes.");
-}
-
-// Interactions
-if (!interactionRateLimit("comment", userId)) {
-  return;  // silencieux pour les interactions
-}
-```
-
-- **Auth** : message d'erreur affiché dans le formulaire
-- **Interactions** : retour silencieux (pas de message utilisateur)
+| Endpoint | Réponse |
+|---|---|
+| `signupAction` / `signinAction` | `ActionError` : « Trop de tentatives. Réessaie dans 15 minutes. » |
+| `submitManuscriptAction` | `ActionError` : « Trop de soumissions. Réessaie dans une minute. » |
+| `commentPublicationAction` | Retour silencieux (pas de message) |
+| `POST /api/parse-epub` | `429` + « Trop d'imports. Réessaie dans une minute. » (affiché dans le formulaire) |
 
 ---
 
 ## Tableau récapitulatif
 
-| Limiteur | Limite | Fenêtre | Clé | Déclenché dans |
-|---|---|---|---|---|
-| `authRateLimit("signup")` | 5 | 15 min | IP | `signupAction` |
-| `authRateLimit("signin")` | 5 | 15 min | IP | `signinAction` |
-| `interactionRateLimit("comment", userId)` | 10 | 1 min | userId | `commentPublicationAction` |
-| `interactionRateLimit("manuscript", userId)` | 10 | 1 min | userId | `submitManuscriptAction` |
+| Appel | Règle | Déclenché dans |
+|---|---|---|
+| `authRateLimit("signup")` | auth (5 / 15 min / IP) | `signupAction` |
+| `authRateLimit("signin")` | auth (5 / 15 min / IP) | `signinAction` |
+| `interactionRateLimit("comment", userId)` | interaction (10 / min / user) | `commentPublicationAction` |
+| `interactionRateLimit("manuscript", userId)` | interaction (10 / min / user) | `submitManuscriptAction` |
+| `interactionRateLimit("parse-epub", userId)` | interaction (10 / min / user) | `POST /api/parse-epub` |
+
+`POST /api/parse-epub` exige aussi une **session** (401 sinon) : avant le 2026-11-14, la route était ouverte à tous, sans limite, alors qu'elle accepte des fichiers de 20 Mo et envoie les couvertures sur Cloudinary.
 
 ---
 
-## Limitations
+## Configuration Upstash
+
+1. Créer une base Redis sur [upstash.com](https://upstash.com) (offre gratuite suffisante), ou réutiliser une base existante : les clés sont préfixées `alternative:ratelimit:`, donc pas de collision avec un autre projet.
+2. Dans **Vercel → Settings → Environment Variables**, ajouter `UPSTASH_REDIS_REST_URL` et `UPSTASH_REDIS_REST_TOKEN` (onglet « REST API » de la base Upstash).
+3. Redéployer.
+
+---
+
+## Tests
+
+`src/lib/rate-limit.test.ts` couvre le mode mémoire (`checkMemory`) : blocage à la limite, réouverture après la fenêtre, isolation des clés. Le mode Upstash n'est pas testé unitairement (il délègue à `@upstash/ratelimit`).
+
+---
+
+## Limitations restantes
 
 | Sujet | Détail |
 |---|---|
-| **In-memory** | Le store se remet à zéro à chaque redémarrage du serveur Node.js |
-| **Single instance** | En cas de scale-out Vercel (plusieurs instances), chaque instance a son propre store → la limite effective est `limit × nb_instances` |
-| **Pas de persistence** | Un redémarrage du serveur en cours de fenêtre remet les compteurs à zéro |
-| **Pas de purge** | Les entrées expirées restent en mémoire jusqu'à la prochaine requête sur la même clé. Sur une longue durée avec beaucoup d'IPs uniques, la Map peut grossir |
-| **Pas de rate limit sur `/api/parse-epub`** | La route de parsing EPUB n'est pas protégée |
-
-**Pour une production robuste :** remplacer par `@upstash/ratelimit` + Vercel KV (store Redis distribué, persistant, partagé entre instances).
+| **IP partagée** | Plusieurs personnes derrière la même IP (école, entreprise) partagent le quota d'authentification |
+| **Fail open** | Si Upstash tombe, plus aucune limite ne s'applique jusqu'à son retour |
+| **Mode mémoire en production** | Si les variables Upstash sont oubliées sur Vercel, le site fonctionne mais la limite redevient quasi inopérante (un avertissement est logué) |

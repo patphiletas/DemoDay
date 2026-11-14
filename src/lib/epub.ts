@@ -10,12 +10,34 @@ export type ParsedEpub = {
   coverBuffer?: Buffer;
 };
 
-function stripHtml(html: string): string {
+// L'italique (<em>, <i>) est conservé sous forme *mot*, comme en Markdown :
+// il porte du sens dans un texte littéraire (titres d'œuvres, mots étrangers,
+// emphase). Les espaces en bordure restent à l'extérieur des astérisques.
+function italicToMarkdown(_match: string, _tag: string, inner: string): string {
+  // Italique couvrant plusieurs paragraphes : on garde la structure, pas l'italique
+  // (un *…* ne peut pas traverser un saut de ligne).
+  if (/<(p|br|div|h[1-6]|li)\b/i.test(inner)) return inner;
+  const text = inner.replace(/<[^>]+>/g, "");
+  if (!text.trim()) return text;
+  const [, lead, core, trail] = text.match(/^(\s*)([\s\S]*?)(\s*)$/) ?? ["", "", text, ""];
+  return `${lead}*${core}*${trail}`;
+}
+
+export function stripHtml(html: string): string {
   return html
+    .replace(/<head\b[\s\S]*?<\/head>/gi, "")
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    // en HTML, retours à la ligne et tabulations du source = simples espaces ;
+    // seuls <br> et les fins de bloc créent des sauts de ligne (ci-dessous)
+    .replace(/\s+/g, " ")
+    .replace(/<(em|i)\b[^>]*>([\s\S]*?)<\/\1>/gi, italicToMarkdown)
+    // fusionne les italiques fragmentés (export Word : <em>El</em><em>le</em>)
+    .replace(/\*([ \t]*)\*/g, "$1")
     .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
+    // fin de bloc (paragraphe, titre, div, liste…) = saut de paragraphe,
+    // sinon un <h1>Titre</h1><p>Texte</p> donnerait « TitreTexte »
+    .replace(/<\/(p|h[1-6]|div|li|blockquote|section|article|header|footer|tr)>/gi, "\n\n")
     .replace(/<[^>]+>/g, "")
     // entités nommées courantes
     .replace(/&nbsp;/g, " ")
@@ -37,6 +59,8 @@ function stripHtml(html: string): string {
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
     // normalise les espaces insécables résiduels en espaces normaux
     .replace(/ /g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }

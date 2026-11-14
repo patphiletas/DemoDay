@@ -105,16 +105,27 @@ Ordre des opérations (important) :
 
 | Étape | Opération | Pourquoi |
 |---|---|---|
-| 1 | Supprime `<style>…</style>` entiers | Évite que le CSS (`@page`, `margin`, etc.) apparaisse dans le texte |
-| 2 | Supprime `<script>…</script>` entiers | Idem pour le JavaScript |
-| 3 | `<br>` → `\n` | Conserve les sauts de ligne |
-| 4 | `</p>` → `\n\n` | Simule les paragraphes (double saut) |
-| 5 | Supprime tous les tags restants | Retire `<em>`, `<strong>`, `<div>`, etc. |
-| 6 | Décode les entités nommées | `&nbsp;` → espace, `&mdash;` → `—`, etc. |
-| 7 | Décode les entités numériques décimales | `&#160;` → ` ` |
-| 8 | Décode les entités hexadécimales | `&#x27;` → `'` |
-| 9 | Normalise les espaces insécables résiduels | ` ` → espace normal |
-| 10 | Réduit les sauts de ligne triples ou plus | `\n\n\n` → `\n\n` |
+| 1 | Supprime `<head>…</head>` | Le `<title>` du fichier XHTML se retrouvait sinon dans le texte (titre de chapitre en double) |
+| 2 | Supprime `<style>…</style>` et `<script>…</script>` entiers | Évite que le CSS ou le JS apparaissent dans le texte |
+| 3 | Tout espace du source (retours à la ligne, tabulations) → un espace | En HTML, un retour à la ligne dans le source n'est qu'un espace. Sinon, les phrases coupées par l'éditeur du fichier se retrouvaient coupées à l'écran (le lecteur affiche en `whitespace-pre-wrap`) |
+| 4 | `<em>` / `<i>` → `*texte*` | Conserve l'italique (titres d'œuvres, mots étrangers, emphase). Les espaces de bordure restent hors des astérisques. Un italique qui couvre plusieurs paragraphes n'est pas converti |
+| 5 | Fusionne les italiques adjacents (`*El**le*` → `*Elle*`) | Les exports Word découpent souvent un italique en plusieurs balises |
+| 6 | `<br>` → `\n` | Conserve les sauts de ligne |
+| 7 | Fin de bloc (`</p>`, `</h1>`…`</h6>`, `</div>`, `</li>`, `</blockquote>`…) → `\n\n` | Un paragraphe par bloc. Avant, seul `</p>` comptait : `<h1>Titre</h1><p>Texte</p>` donnait « TitreTexte » |
+| 8 | Supprime tous les tags restants | Retire `<strong>`, `<span>`, etc. |
+| 9 | Décode les entités nommées, décimales et hexadécimales | `&nbsp;` → espace, `&mdash;` → `—`, `&#160;`, `&#x27;`… |
+| 10 | Normalise les espaces insécables résiduels | → espace normal |
+| 11 | Supprime les espaces en bord de ligne, réduit les sauts triples | `\n\n\n` → `\n\n` |
+
+### Affichage de l'italique
+
+Le texte est stocké en clair avec la convention `*mot*`. À la lecture, `ReadingText` (`src/components/ReadingText.tsx`) découpe le texte via `splitItalic` (`src/lib/inline-italic.ts`) et rend chaque segment `*…*` dans un `<em>`. Un astérisque isolé (appel de note, séparateur `*`) reste affiché tel quel, et un italique ne traverse jamais un saut de ligne. Les auteurs qui collent leur texte peuvent utiliser la même convention (rappelée sous le champ « Texte » du formulaire).
+
+### Tests et validation sur de vrais livres
+
+`src/lib/epub.test.ts` fabrique des EPUB minimaux en mémoire (`adm-zip`) et vérifie : ordre des chapitres, titre en double supprimé, pages quasi vides ignorées, italique conservé, couverture extraite, fichier invalide rejeté — plus les cas de `stripHtml` (entités, blocs, italiques fragmentés, retours à la ligne du source).
+
+Le 2026-11-14, le parser a aussi été passé sur un échantillon de **60 EPUB réels** (classiques du domaine public : Hugo, Balzac, Dumas, Verne, Conan Doyle, Woolf, la Bible…) : 60 lus sans erreur, 2 010 chapitres, 44 livres avec italique, 50 avec couverture, aucun titre de chapitre en double. C'est ce test qui a révélé les étapes 1, 3, 5 et 7 ci-dessus.
 
 ### 3f. Extraction de la couverture
 

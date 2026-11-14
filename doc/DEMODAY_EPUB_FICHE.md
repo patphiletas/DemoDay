@@ -88,7 +88,7 @@ Ce format `##` est ensuite lu par `parseChapters()` pour construire la navigatio
 > La route retourne un HTTP 413. Le client affiche une erreur sous le champ fichier.
 
 **Q : Il y a un rate limiting sur cette route ?**
-> Non, c'est une limitation connue. Pour un démo c'est acceptable, en production il faudrait ajouter un rate limit par IP ou par utilisateur.
+> Oui, depuis le 2026-11-14 : la route exige d'être connecté (401 sinon) et est limitée à 10 imports par minute et par utilisateur, via Upstash Redis (voir `doc/RATE_LIMITING.md`).
 
 **Q : Est-ce que ça gère tous les formats EPUB (v2, v3) ?**
 > epub2 gère les deux, mais le parsing est optimisé pour EPUB 2. Certains EPUB 3 avec des fonctionnalités avancées (scripts, media overlays) peuvent perdre des éléments au nettoyage — c'est voulu, on veut du texte brut.

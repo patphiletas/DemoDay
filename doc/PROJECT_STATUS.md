@@ -73,7 +73,8 @@
 ### Tests & CI/CD
 - [x] Vitest configuré
 - [x] Tests de validation Zod + helpers d'erreurs
-- [x] GitHub Actions (tests sur chaque push)
+- [x] Tests du parser EPUB (EPUB fabriqués en mémoire), du rendu italique et du rate limiting (59 tests au total)
+- [x] GitHub Actions sur chaque push et pull request : lint, `tsc --noEmit`, tests, build
 - [x] Node version épinglée via `.nvmrc` (24.16.0) — CI lit `node-version-file: '.nvmrc'`
 - [x] Déploiement Vercel : https://demo-day-wine.vercel.app/
 

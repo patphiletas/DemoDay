@@ -57,7 +57,7 @@ export function parseChapters(content: string): Chapter[] {
       {ch.title}
     </h2>
     <div className="reading-body whitespace-pre-wrap font-serif-display">
-      {ch.content}
+      <ReadingText text={ch.content} />
     </div>
   </section>
 ))}
@@ -66,6 +66,7 @@ export function parseChapters(content: string): Chapter[] {
 - `id="ch-0"`, `id="ch-1"`... : ancres pour le scroll depuis l'index
 - `scroll-mt-32` : marge de 8rem au scroll pour que le titre ne passe pas sous la barre sticky
 - `whitespace-pre-wrap` : préserve les sauts de ligne du texte brut
+- `ReadingText` : rend la convention `*mot*` en `<em>` (italique conservé à l'import EPUB, voir `doc/EPUB_IMPORT.md`)
 - `break-words` sur le `<h2>` : les titres longs se coupent proprement
 
 ### Sans chapitres

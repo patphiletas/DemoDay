@@ -47,7 +47,7 @@ lien vers la démo : https://demo-day-wine.vercel.app/
 | 📱 Responsive | Layout mobile optimisé pour la lecture, l'admin, la navigation et le carousel |
 | 🧯 Erreurs | Boundary `error.tsx` avec relance du rendu et helpers partagés pour les retours de Server Actions |
 | 🔒 Rate limiting | 5 tentatives/15 min sur auth, 10 interactions/min par utilisateur |
-| ✅ Tests & CI/CD | Vitest + GitHub Actions (tests sur chaque push) + déploiement Vercel |
+| ✅ Tests & CI/CD | Vitest (59 tests) + GitHub Actions (lint, types, tests, build) + déploiement Vercel |
 
 ---
 
@@ -98,10 +98,10 @@ demoday/
 │       ├── session.ts       # gardes d'auth partagés (requireSession, requireAdmin)
 │       ├── utils.ts         # utilitaires (slugify, parseChapters)
 │       ├── validation.ts    # schemas Zod + types inférés
-│       └── *.test.ts        # tests validation + helpers d'erreurs
+│       └── *.test.ts        # tests validation, erreurs, parser EPUB, italique, rate limiting
 ├── .github/
 │   └── workflows/
-│       └── learn-github-actions.yml  # CI : npm ci + npm test -- --run
+│       └── learn-github-actions.yml  # CI : lint, tsc, tests, build
 └── drizzle.config.ts
 ```
 
@@ -163,6 +163,10 @@ RESEND_API_KEY=your_resend_key
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Optionnel en local (rate limiting partagé) — obligatoire en production
+UPSTASH_REDIS_REST_URL=https://your-db.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
 ```
 
 ---
@@ -189,9 +193,12 @@ npm test -- --run # Vitest en one-shot
 npm run test:ui   # Interface Vitest UI
 ```
 
-Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exécute à chaque push :
+Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exécute à chaque push et pull request :
 1. `npm ci`
-2. `npm test -- --run`
+2. `npm run lint`
+3. `npx tsc --noEmit`
+4. `npm test -- --run`
+5. `npm run build`
 
 ---
 
@@ -203,7 +210,7 @@ Le workflow GitHub Actions (`.github/workflows/learn-github-actions.yml`) s'exé
 | 2 | BDD + migrations | Drizzle ORM + PostgreSQL (Neon) |
 | 3 | Auth + protections | Better Auth + sessions HTTP-only |
 | 4 | Validation serveur | Zod v4 schemas |
-| 5 | Tests unitaires | Vitest — validation schemas + helpers d'erreurs |
+| 5 | Tests unitaires | Vitest — validation, erreurs, parser EPUB, italique, rate limiting |
 | 6 | CI/CD | GitHub Actions + Vercel |
 | 7 | Mode sombre | `ThemeToggle` + `prefers-color-scheme` + Tailwind `dark:` |
 | 8 | Upload d'images | Cloudinary v2 depuis Server Action et route API |

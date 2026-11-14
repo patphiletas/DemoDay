@@ -30,11 +30,11 @@ Les données utilisateur sont maintenant échappées via la fonction `h()` avant
 
 **Fichier :** `src/lib/rate-limit.ts`
 
-Rate limiting in-memory implémenté :
+Rate limiting implémenté :
 - `authRateLimit` : 5 tentatives / 15 min par IP (signin, signup)
-- `interactionRateLimit` : 10 actions / min par userId (commentaires, soumissions)
+- `interactionRateLimit` : 10 actions / min par userId (commentaires, soumissions, import EPUB)
 
-> Note : le store est in-memory et se réinitialise au redémarrage du serveur. Pour une production multi-instance, remplacer par `@upstash/ratelimit` + Vercel KV.
+> 2026-11-14 : le store en mémoire (inopérant sur Vercel, une `Map` par instance) est remplacé par Upstash Redis, avec repli en mémoire en local. `POST /api/parse-epub` exige désormais une session et est limitée. Voir `doc/RATE_LIMITING.md`.
 
 ---
 

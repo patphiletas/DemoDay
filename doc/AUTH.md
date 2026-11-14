@@ -238,7 +238,7 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';
 | 5 tentatives | 15 minutes | `signup:{ip}` ou `signin:{ip}` | Brute force sur les formulaires d'auth |
 | 10 actions | 1 minute | `comment:{userId}` ou `manuscript:{userId}` | Spam de commentaires / soumissions |
 
-Le store est un `Map` en mémoire — il se remet à zéro au redémarrage du serveur et ne fonctionne pas si Vercel déploie plusieurs instances. Pour une production robuste, il faudrait remplacer par `@upstash/ratelimit` + Vercel KV.
+Les compteurs sont stockés dans Upstash Redis en production (partagés entre toutes les instances Vercel), avec un repli en mémoire en local et en CI. Détail dans `doc/RATE_LIMITING.md`.
 
 L'IP est extraite depuis les headers `x-forwarded-for` (Vercel) ou `x-real-ip`, avec fallback `"unknown"`. Toutes les requêtes sans IP identifiable sont regroupées sous la même clé — comportement conservateur mais acceptable.
 
