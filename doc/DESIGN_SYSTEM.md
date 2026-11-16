@@ -186,3 +186,7 @@ Ces variables sont consommées par la classe `.reading-body`.
 3. **Pas de `outline: none`** sans alternative visible — `.field:focus` fournit un ring accessible
 4. **`min-height: 2.5rem`** (Tailwind : `min-h-10`) sur tous les éléments interactifs mobiles
 5. **Serif pour le contenu éditorial**, sans-serif pour l'UI
+
+## Icône d'onglet (2026-11-16)
+
+`src/app/icon.tsx` génère l'icône : « A » en Gelasio (police Google proche de Georgia, utilisée pour les titres `.font-serif-display`) sur le rouge d'accent `#b7352d`, texte `#fffdf8`. La police est chargée de Google Fonts réduite à la seule lettre ; en cas d'échec, l'icône sort avec la police par défaut. Le `favicon.ico` par défaut de Next.js a été supprimé : ne pas le remettre, il serait prioritaire.
